@@ -1,0 +1,37 @@
+import React, { useEffect, useState } from 'react';
+
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import { InputLabel, Stack } from '@mui/material';
+
+type Props = {
+  label: string | JSX.Element;
+  children: JSX.Element | JSX.Element[];
+  defaultValue: string;
+  onChange: (v: string) => void;
+};
+export default function RadioGroupInput({ label, children, defaultValue, onChange }: Props) {
+  const [value, setValue] = useState(defaultValue);
+  useEffect(() => {
+    setValue(defaultValue);
+  }, [defaultValue]);
+  return (
+    <Stack alignItems="flex-start">
+      <InputLabel shrink>{label}</InputLabel>
+      <ToggleButtonGroup
+        exclusive
+        fullWidth
+        value={value}
+        size="small"
+        onChange={(_, v: unknown) => {
+          if (typeof v !== 'string') {
+            return;
+          }
+          setValue(v);
+          onChange(v);
+        }}
+      >
+        {children}
+      </ToggleButtonGroup>
+    </Stack>
+  );
+}

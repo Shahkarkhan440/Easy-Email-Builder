@@ -1,0 +1,110 @@
+export type VariableGroupId = 'custom' | 'contacts' | 'email' | 'organization' | 'date' | 'links';
+
+export type VariableKind = 'user' | 'builtin';
+
+export type VariableGroup = {
+  id: VariableGroupId;
+  items: { name: string; labelKey: string; kind: VariableKind }[];
+};
+
+export type CustomVariableDefinition = { name: string; label: string };
+
+export const VARIABLE_NAME_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+/** Variable catalog (built-ins). Custom contact attributes are added in the UI. */
+export const BASE_VARIABLE_GROUPS: VariableGroup[] = [
+  {
+    id: 'contacts',
+    items: [
+      { name: 'first_name', labelKey: 'text.variables.firstName', kind: 'user' },
+      { name: 'last_name', labelKey: 'text.variables.lastName', kind: 'user' },
+      { name: 'middle_name', labelKey: 'text.variables.middleName', kind: 'user' },
+    ],
+  },
+  {
+    id: 'email',
+    items: [
+      { name: 'email', labelKey: 'text.variables.email', kind: 'user' },
+      { name: 'alternative_email', labelKey: 'text.variables.alternativeEmail', kind: 'user' },
+    ],
+  },
+  {
+    id: 'organization',
+    items: [
+      { name: 'company', labelKey: 'text.variables.company', kind: 'user' },
+      { name: 'address_line_1', labelKey: 'text.variables.addressLine1', kind: 'user' },
+      { name: 'address_line_2', labelKey: 'text.variables.addressLine2', kind: 'user' },
+      { name: 'country', labelKey: 'text.variables.country', kind: 'user' },
+      { name: 'city', labelKey: 'text.variables.city', kind: 'user' },
+      { name: 'state', labelKey: 'text.variables.state', kind: 'user' },
+      { name: 'postal_code', labelKey: 'text.variables.postalCode', kind: 'user' },
+      { name: 'recipient_company', labelKey: 'text.variables.recipientCompany', kind: 'user' },
+      { name: 'recipient_address_line_1', labelKey: 'text.variables.recipientAddressLine1', kind: 'user' },
+      { name: 'recipient_address_line_2', labelKey: 'text.variables.recipientAddressLine2', kind: 'user' },
+      { name: 'recipient_country', labelKey: 'text.variables.recipientCountry', kind: 'user' },
+      { name: 'recipient_city', labelKey: 'text.variables.recipientCity', kind: 'user' },
+      { name: 'recipient_state', labelKey: 'text.variables.recipientState', kind: 'user' },
+      { name: 'recipient_postal_code', labelKey: 'text.variables.recipientPostalCode', kind: 'user' },
+    ],
+  },
+  {
+    id: 'date',
+    items: [
+      { name: 'birthday', labelKey: 'text.variables.birthday', kind: 'user' },
+      { name: 'send_date', labelKey: 'text.variables.currentDate', kind: 'builtin' },
+      { name: 'send_year', labelKey: 'text.variables.currentYear', kind: 'builtin' },
+      { name: 'send_month', labelKey: 'text.variables.currentMonthName', kind: 'builtin' },
+      { name: 'send_weekday', labelKey: 'text.variables.currentWeekday', kind: 'builtin' },
+    ],
+  },
+  {
+    id: 'links',
+    items: [{ name: 'unsubscribe_link', labelKey: 'text.variables.unsubscribeLink', kind: 'builtin' }],
+  },
+];
+
+export function buildAllowedVariableNameSets(args: {
+  baseGroups?: VariableGroup[];
+  contactAttributes?: { AttrField: string; Enable?: number | boolean }[] | null;
+  customVariables?: CustomVariableDefinition[] | null;
+}) {
+  const base = args.baseGroups ?? BASE_VARIABLE_GROUPS;
+  const allowedUser = new Set<string>();
+  const allowedBuiltin = new Set<string>();
+
+  for (const g of base) {
+    for (const it of g.items) {
+      if (it.kind === 'user') allowedUser.add(it.name);
+      else allowedBuiltin.add(it.name);
+    }
+  }
+
+  const attrs = Array.isArray(args.contactAttributes) ? args.contactAttributes : [];
+  for (const a of attrs) {
+    const en = (a as any)?.Enable;
+    if (en === 0 || en === false) continue;
+    const f = typeof (a as any)?.AttrField === 'string' ? (a as any).AttrField.trim() : '';
+    if (!f) continue;
+    allowedUser.add(f);
+  }
+
+  const cvs = Array.isArray(args.customVariables) ? args.customVariables : [];
+  for (const cv of cvs) {
+    const n = typeof cv?.name === 'string' ? cv.name.trim() : '';
+    if (n && VARIABLE_NAME_RE.test(n)) allowedUser.add(n);
+  }
+
+  return { allowedUser, allowedBuiltin };
+}
+
+export function isBuiltinVariableName(name: string): boolean {
+  const attribute = name.trim();
+  if (!attribute) return false;
+  return BASE_VARIABLE_GROUPS.some((group) =>
+    group.items.some((item) => item.kind === 'builtin' && item.name === attribute),
+  );
+}
+
+export function requiresVariableDefault(name: string, kind: VariableKind = 'user'): boolean {
+  return kind === 'user';
+}

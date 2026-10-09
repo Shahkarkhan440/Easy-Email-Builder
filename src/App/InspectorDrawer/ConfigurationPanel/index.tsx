@@ -1,0 +1,91 @@
+import React from 'react';
+
+import { Box, Typography } from '@mui/material';
+
+import { TEditorBlock } from '../../../documents/editor/core';
+import { setDocument, useDocument, useEditingSlot, useSelectedBlockId } from '../../../documents/editor/EditorContext';
+import { isLockedBlockId } from '../../../documents/editor/headerFooter';
+import { useTranslation } from '../../../i18n/useTranslation';
+
+import ButtonSidebarPanel from './input-panels/ButtonSidebarPanel';
+import ColumnsContainerSidebarPanel from './input-panels/ColumnsContainerSidebarPanel';
+import ContainerSidebarPanel from './input-panels/ContainerSidebarPanel';
+import DividerSidebarPanel from './input-panels/DividerSidebarPanel';
+import EmailLayoutSidebarPanel from './input-panels/EmailLayoutSidebarPanel';
+import HeadingSidebarPanel from './input-panels/HeadingSidebarPanel';
+import HtmlSidebarPanel from './input-panels/HtmlSidebarPanel';
+import ImageSidebarPanel from './input-panels/ImageSidebarPanel';
+import VideoSidebarPanel from './input-panels/VideoSidebarPanel';
+import SpacerSidebarPanel from './input-panels/SpacerSidebarPanel';
+import TextSidebarPanel from './input-panels/TextSidebarPanel';
+import SocialsSidebarPanel from './input-panels/SocialsSidebarPanel';
+
+function renderMessage(val: string) {
+  return (
+    <Box sx={{ m: 3, p: 1, border: '1px dashed', borderColor: 'divider' }}>
+      <Typography color="text.secondary">{val}</Typography>
+    </Box>
+  );
+}
+
+export default function ConfigurationPanel() {
+  const { t } = useTranslation();
+  const document = useDocument();
+  const selectedBlockId = useSelectedBlockId();
+  const editingSlot = useEditingSlot();
+
+  if (!selectedBlockId) {
+    return renderMessage(t('inspector.clickBlockToInspect'));
+  }
+  const block = document[selectedBlockId];
+  if (!block) {
+    return renderMessage(t('inspector.blockNotFound', { id: selectedBlockId }));
+  }
+
+  // Header/footer are read-only in the full view; use "Edit" to edit them on their own
+  if (isLockedBlockId(selectedBlockId) && editingSlot !== selectedBlockId) {
+    return renderMessage(t('headerFooter.readOnlyHint'));
+  }
+
+  const setBlock = (conf: TEditorBlock) => setDocument({ [selectedBlockId]: conf });
+  const { data, type } = block;
+  switch (type) {
+    // case 'Avatar':
+    //   return <AvatarSidebarPanel key={selectedBlockId} data={data} setData={(data) => setBlock({ type, data })} />;
+    case 'Button':
+      return <ButtonSidebarPanel key={selectedBlockId} data={data} setData={(data) => setBlock({ type, data })} />;
+    case 'ColumnsContainer':
+      return (
+        <ColumnsContainerSidebarPanel key={selectedBlockId} data={data} setData={(data) => setBlock({ type, data })} />
+      );
+    case 'Container':
+      return <ContainerSidebarPanel key={selectedBlockId} data={data} setData={(data) => setBlock({ type, data })} />;
+    case 'Divider':
+      return <DividerSidebarPanel key={selectedBlockId} data={data} setData={(data) => setBlock({ type, data })} />;
+    case 'Heading':
+      return <HeadingSidebarPanel key={selectedBlockId} data={data} setData={(data) => setBlock({ type, data })} />;
+    case 'Html':
+      return <HtmlSidebarPanel key={selectedBlockId} data={data} setData={(data) => setBlock({ type, data })} />;
+    case 'Image':
+      return <ImageSidebarPanel key={selectedBlockId} data={data} setData={(data) => setBlock({ type, data })} />;
+    case 'Video':
+      return <VideoSidebarPanel key={selectedBlockId} data={data} setData={(data) => setBlock({ type, data })} />;
+    case 'EmailLayout':
+      return <EmailLayoutSidebarPanel key={selectedBlockId} data={data} setData={(data) => setBlock({ type, data })} />;
+    case 'Spacer':
+      return <SpacerSidebarPanel key={selectedBlockId} data={data} setData={(data) => setBlock({ type, data })} />;
+    case 'Text':
+      return (
+        <TextSidebarPanel
+          key={selectedBlockId}
+          blockId={selectedBlockId}
+          data={data}
+          setData={(data) => setBlock({ type, data })}
+        />
+      );
+    case 'Socials':
+      return <SocialsSidebarPanel key={selectedBlockId} data={data} setData={(data) => setBlock({ type, data })} />;
+    default:
+      return <pre>{JSON.stringify(block, null, '  ')}</pre>;
+  }
+}

@@ -1,0 +1,153 @@
+import React from 'react';
+
+import * as MonitorOutlinedModule from '@mui/icons-material/MonitorOutlined';
+import * as PhoneIphoneOutlinedModule from '@mui/icons-material/PhoneIphoneOutlined';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import { Box, Stack, SxProps, Theme, Tooltip, useTheme } from '@mui/material';
+import { Reader } from 'monto-email-core';
+
+import EditorBlock from '../../documents/editor/EditorBlock';
+import {
+  setSelectedMainTab,
+  setSelectedScreenSize,
+  useDocument,
+  useSelectedMainTab,
+  useSelectedScreenSize,
+  useShowJsonFeatures,
+} from '../../documents/editor/EditorContext';
+import { useTranslation } from '../../i18n/useTranslation';
+import ToggleInspectorPanelButton from '../InspectorDrawer/ToggleInspectorPanelButton';
+import ToggleSamplesPanelButton from '../SamplesDrawer/ToggleSamplesPanelButton';
+
+import DownloadJson from './DownloadJson';
+import HtmlPanel from './HtmlPanel';
+import ImportJson from './ImportJson';
+import JsonPanel from './JsonPanel';
+import MainTabsGroup from './MainTabsGroup';
+import NameInput from './NameInput';
+import RedoButton from './RedoButton';
+import SaveAndExitButton from './SaveAndExitButton';
+import SaveButton from './SaveButton';
+import UndoButton from './UndoButton';
+
+import { resolveMuiIcon } from '../../utils/resolveMuiIcon';
+
+const MonitorOutlined = resolveMuiIcon(MonitorOutlinedModule);
+const PhoneIphoneOutlined = resolveMuiIcon(PhoneIphoneOutlinedModule);
+
+export default function TemplatePanel() {
+  const { t } = useTranslation();
+  const document = useDocument();
+  const selectedMainTab = useSelectedMainTab();
+  const selectedScreenSize = useSelectedScreenSize();
+  const showJsonFeatures = useShowJsonFeatures();
+
+  // If JSON features are disabled while on the JSON tab, switch to the editor tab
+  React.useEffect(() => {
+    if (!showJsonFeatures && selectedMainTab === 'json') {
+      setSelectedMainTab('editor');
+    }
+  }, [showJsonFeatures, selectedMainTab]);
+
+  let mainBoxSx: SxProps = {
+    flex: 1,
+    overflow: 'visible',
+  };
+  if (selectedScreenSize === 'mobile') {
+    mainBoxSx = {
+      ...mainBoxSx,
+      margin: '32px auto',
+      width: 370,
+      height: 800,
+      boxShadow:
+        'rgba(33, 36, 67, 0.04) 0px 10px 20px, rgba(33, 36, 67, 0.04) 0px 2px 6px, rgba(33, 36, 67, 0.04) 0px 0px 1px',
+    };
+  }
+
+  const handleScreenSizeChange = (_: unknown, value: unknown) => {
+    if (value === 'mobile' || value === 'desktop') setSelectedScreenSize(value);
+    else setSelectedScreenSize('desktop');
+  };
+
+  const theme = useTheme();
+  const screenSizeValue = selectedScreenSize === 'desktop' || selectedScreenSize === 'mobile' ? selectedScreenSize : 'desktop';
+  const selectedSx: SxProps<Theme> = {
+    backgroundColor: theme.palette?.action?.selected ?? 'rgba(25, 118, 210, 0.12)',
+    color: theme.palette?.primary?.main ?? '#1976d2',
+    '&:hover': { backgroundColor: theme.palette?.action?.selected ?? 'rgba(25, 118, 210, 0.12)' },
+  };
+
+  const renderMainPanel = () => {
+    switch (selectedMainTab) {
+      case 'editor':
+        return (
+          <Box sx={mainBoxSx}>
+            <EditorBlock id="root" />
+          </Box>
+        );
+      case 'preview':
+        return (
+          <Box sx={mainBoxSx}>
+            <Reader document={document} rootBlockId="root" />
+          </Box>
+        );
+      case 'html':
+        return <HtmlPanel />;
+      case 'json':
+        return showJsonFeatures ? <JsonPanel /> : null;
+    }
+  };
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      <Stack
+        sx={{
+          height: 49,
+          borderBottom: 1,
+          borderColor: 'divider',
+          backgroundColor: 'white',
+          flexShrink: 0,
+          position: 'relative',
+          zIndex: 1,
+          px: 1,
+        }}
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <ToggleSamplesPanelButton />
+        <NameInput />
+        <Stack px={2} direction="row" gap={2} width="100%" justifyContent="space-between" alignItems="center">
+          <Stack direction="row" spacing={2}>
+            <MainTabsGroup />
+          </Stack>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <UndoButton />
+            <RedoButton />
+            {showJsonFeatures && <DownloadJson />}
+            {showJsonFeatures && <ImportJson />}
+            {/* <SaveButton />
+            <SaveAndExitButton /> */}
+            <ToggleButtonGroup size="small" value={screenSizeValue} exclusive onChange={handleScreenSizeChange}>
+              <Tooltip title={t('common.desktopView')} arrow>
+                <ToggleButton value="desktop" sx={screenSizeValue === 'desktop' ? selectedSx : undefined}>
+                  <MonitorOutlined fontSize="small" />
+                </ToggleButton>
+              </Tooltip>
+              <Tooltip title={t('common.mobileView')} arrow>
+                <ToggleButton value="mobile" sx={screenSizeValue === 'mobile' ? selectedSx : undefined}>
+                  <PhoneIphoneOutlined fontSize="small" />
+                </ToggleButton>
+              </Tooltip>
+            </ToggleButtonGroup>
+          </Stack>
+        </Stack>
+        <ToggleInspectorPanelButton />
+      </Stack>
+      <Box sx={{ flex: 1, overflow: 'auto', minWidth: 370, display: 'flex', flexDirection: 'column' }}>
+        {renderMainPanel()}
+      </Box>
+    </Box>
+  );
+}

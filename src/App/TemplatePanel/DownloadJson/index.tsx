@@ -1,0 +1,26 @@
+import React, { useMemo } from 'react';
+
+import * as FileDownloadOutlinedModule from '@mui/icons-material/FileDownloadOutlined';
+import { IconButton, Tooltip } from '@mui/material';
+
+import { useDocument } from '../../../documents/editor/EditorContext';
+import { useTranslation } from '../../../i18n/useTranslation';
+
+import { resolveMuiIcon } from '../../../utils/resolveMuiIcon';
+
+const FileDownloadOutlined = resolveMuiIcon(FileDownloadOutlinedModule);
+
+export default function DownloadJson() {
+  const { t } = useTranslation();
+  const doc = useDocument();
+  const href = useMemo(() => {
+    return `data:text/plain,${encodeURIComponent(JSON.stringify(doc, null, '  '))}`;
+  }, [doc]);
+  return (
+    <Tooltip title={t('common.downloadJson')} arrow>
+      <IconButton href={href} download="emailTemplate.json">
+        <FileDownloadOutlined fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  );
+}

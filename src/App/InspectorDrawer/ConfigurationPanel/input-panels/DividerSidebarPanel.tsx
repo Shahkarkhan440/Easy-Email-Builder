@@ -1,0 +1,61 @@
+import React, { useState } from 'react';
+
+import * as HeightOutlinedModule from '@mui/icons-material/HeightOutlined';
+import { DividerProps, DividerPropsDefaults, DividerPropsSchema } from 'monto-email-block-divider';
+import { ZodError } from 'zod';
+import { useTranslation } from '../../../../i18n/useTranslation';
+
+import BaseSidebarPanel from './helpers/BaseSidebarPanel';
+import ColorInput from './helpers/inputs/ColorInput';
+import SliderInput from './helpers/inputs/SliderInput';
+import MultiStylePropertyPanel from './helpers/style-inputs/MultiStylePropertyPanel';
+
+import { resolveMuiIcon } from '../../../../utils/resolveMuiIcon';
+
+const HeightOutlined = resolveMuiIcon(HeightOutlinedModule);
+
+type DividerSidebarPanelProps = {
+  data: DividerProps;
+  setData: (v: DividerProps) => void;
+};
+export default function DividerSidebarPanel({ data, setData }: DividerSidebarPanelProps) {
+  const { t } = useTranslation();
+  const [, setErrors] = useState<ZodError | null>(null);
+  const updateData = (d: unknown) => {
+    const res = DividerPropsSchema.safeParse(d);
+    if (res.success) {
+      setData(res.data);
+      setErrors(null);
+    } else {
+      setErrors(res.error);
+    }
+  };
+
+  const lineColor = data.props?.lineColor ?? DividerPropsDefaults.lineColor;
+  const lineHeight = data.props?.lineHeight ?? DividerPropsDefaults.lineHeight;
+
+  return (
+    <BaseSidebarPanel title={t('divider.title')}>
+      <ColorInput
+        label={t('divider.color')}
+        defaultValue={lineColor}
+        onChange={(lineColor) => updateData({ ...data, props: { ...data.props, lineColor } })}
+      />
+      <SliderInput
+        label={t('divider.height')}
+        iconLabel={<HeightOutlined sx={{ color: 'text.secondary' }} />}
+        units="px"
+        step={1}
+        min={1}
+        max={24}
+        defaultValue={lineHeight}
+        onChange={(lineHeight) => updateData({ ...data, props: { ...data.props, lineHeight } })}
+      />
+      <MultiStylePropertyPanel
+        names={['backgroundColor', 'padding']}
+        value={data.style}
+        onChange={(style) => updateData({ ...data, style })}
+      />
+    </BaseSidebarPanel>
+  );
+}

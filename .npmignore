@@ -1,0 +1,34 @@
+# Development files
+src/
+node_modules/
+*.log
+.DS_Store
+
+# Build tool config
+vite.config.ts
+tsconfig.json
+.eslintrc*
+.prettierrc*
+
+# Development
+index.html
+*.local
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Tests
+coverage/
+.nyc_output/
+
+# Other
+pnpm-lock.yaml
+package-lock.json
+.git/
+.gitignore
+
