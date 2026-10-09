@@ -44,10 +44,10 @@ Setup for VS Code, OpenAI Codex and more: see the [MCP server README](./mcp/READ
 npm install easy-email-builder
 ```
 
-Peer dependencies:
+Peer dependencies (React 18 and MUI 5):
 
 ```bash
-npm install react react-dom @mui/material @mui/icons-material @emotion/react @emotion/styled
+npm install react@18 react-dom@18 @mui/material@5 @mui/icons-material@5 @emotion/react @emotion/styled react-syntax-highlighter
 ```
 
 ## Usage

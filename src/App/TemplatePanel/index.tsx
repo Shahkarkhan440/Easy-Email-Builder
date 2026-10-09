@@ -2,9 +2,7 @@ import React from 'react';
 
 import * as MonitorOutlinedModule from '@mui/icons-material/MonitorOutlined';
 import * as PhoneIphoneOutlinedModule from '@mui/icons-material/PhoneIphoneOutlined';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import { Box, Stack, SxProps, Theme, Tooltip, useTheme } from '@mui/material';
+import { Box, Stack, SxProps, Theme, Tooltip, useTheme, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { Reader } from 'monto-email-core';
 
 import EditorBlock from '../../documents/editor/EditorBlock';

@@ -14,7 +14,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Shahkarkhan440/Easy-Email-Builder",
+    "url": "git+https://github.com/Shahkarkhan440/Easy-Email-Builder.git",
     "directory": "mcp"
   },
   "homepage": "https://github.com/Shahkarkhan440/Easy-Email-Builder/tree/main/mcp#readme",

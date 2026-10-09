@@ -5,8 +5,7 @@ import * as LinkOutlinedModule from '@mui/icons-material/LinkOutlined';
 import * as VerticalAlignBottomOutlinedModule from '@mui/icons-material/VerticalAlignBottomOutlined';
 import * as VerticalAlignCenterOutlinedModule from '@mui/icons-material/VerticalAlignCenterOutlined';
 import * as VerticalAlignTopOutlinedModule from '@mui/icons-material/VerticalAlignTopOutlined';
-import ToggleButton from '@mui/material/ToggleButton';
-import { Button, CircularProgress, Stack, Typography } from '@mui/material';
+import { Button, CircularProgress, Stack, Typography, ToggleButton } from '@mui/material';
 import { ZodError } from 'zod';
 
 import { useVideoUploadHandler } from '../../../../documents/editor/EditorContext';

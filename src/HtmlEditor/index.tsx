@@ -15,8 +15,6 @@ import {
   tomorrowNightBlue,
   xcodeDark
 } from '@uiw/codemirror-themes-all';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import {
   Accordion,
   AccordionDetails,
@@ -39,6 +37,8 @@ import {
   Typography,
   ListSubheader,
   useTheme,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import * as AddOutlinedModule from '@mui/icons-material/AddOutlined';
@@ -430,6 +430,9 @@ ref: React.Ref<HtmlEditorRef>,
 
   // Process HTML: complete the document structure and strip dangerous tags
   const processHtml = (html: string): string => {
+    // Server-side rendering has no DOMParser and can't sanitize: render an empty preview; the browser fills it in
+    if (typeof DOMParser === 'undefined') return '';
+
     const sanitizedHtml = html || '';
 
     // Check whether the document structure needs completing

@@ -3,8 +3,7 @@ import React, { useRef, useState } from 'react';
 import * as CheckModule from '@mui/icons-material/Check';
 import * as CloudUploadOutlinedModule from '@mui/icons-material/CloudUploadOutlined';
 import * as LinkOutlinedModule from '@mui/icons-material/LinkOutlined';
-import ToggleButton from '@mui/material/ToggleButton';
-import { Box, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Stack, TextField, Typography, ToggleButton } from '@mui/material';
 import { Video, VideoProps } from 'monto-email-block-video';
 
 import { useCurrentBlockId } from '../../editor/EditorBlock';

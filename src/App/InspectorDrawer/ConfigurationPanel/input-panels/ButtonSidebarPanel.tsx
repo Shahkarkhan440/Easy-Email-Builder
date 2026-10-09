@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import ToggleButton from '@mui/material/ToggleButton';
+import { ToggleButton } from '@mui/material';
 import { ButtonProps, ButtonPropsDefaults, ButtonPropsSchema } from 'monto-email-block-button';
 import { ZodError } from 'zod';
 import { useTranslation } from '../../../../i18n/useTranslation';

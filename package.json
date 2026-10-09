@@ -16,7 +16,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Shahkarkhan440/Easy-Email-Builder"
+    "url": "git+https://github.com/Shahkarkhan440/Easy-Email-Builder.git"
   },
   "homepage": "https://shahkarkhan440.github.io/Easy-Email-Builder/",
   "bugs": {
@@ -45,7 +45,8 @@
     "dev": "vite",
     "build": "vite build",
     "build:lib": "vite build --mode library && tsc --emitDeclarationOnly",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build:lib"
   },
   "peerDependencies": {
     "@emotion/react": "^11.11.0",

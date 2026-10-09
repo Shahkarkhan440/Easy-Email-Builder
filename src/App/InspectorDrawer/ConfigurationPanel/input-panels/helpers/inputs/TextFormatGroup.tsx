@@ -1,8 +1,6 @@
 import React from 'react';
 
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import { Stack } from '@mui/material';
+import { Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import * as FormatBoldOutlinedModule from '@mui/icons-material/FormatBoldOutlined';
 import * as FormatItalicOutlinedModule from '@mui/icons-material/FormatItalicOutlined';
 import * as FormatUnderlinedOutlinedModule from '@mui/icons-material/FormatUnderlinedOutlined';

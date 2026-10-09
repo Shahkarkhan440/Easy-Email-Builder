@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import * as FormatAlignCenterOutlinedModule from '@mui/icons-material/FormatAlignCenterOutlined';
 import * as FormatAlignLeftOutlinedModule from '@mui/icons-material/FormatAlignLeftOutlined';
 import * as FormatAlignRightOutlinedModule from '@mui/icons-material/FormatAlignRightOutlined';
-import ToggleButton from '@mui/material/ToggleButton';
+import { ToggleButton } from '@mui/material';
 
 import RadioGroupInput from './RadioGroupInput';
 

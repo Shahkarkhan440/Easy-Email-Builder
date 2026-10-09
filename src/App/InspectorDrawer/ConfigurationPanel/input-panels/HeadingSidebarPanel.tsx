@@ -16,8 +16,8 @@ import {
   Stack,
   TextField,
   Typography,
+  ToggleButton,
 } from '@mui/material';
-import ToggleButton from '@mui/material/ToggleButton';
 import { HeadingPropsDefaults } from 'monto-email-block-heading';
 import { ZodError } from 'zod';
 import { useTranslation } from '../../../../i18n/useTranslation';

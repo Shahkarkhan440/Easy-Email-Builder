@@ -5,8 +5,7 @@ import * as UnfoldMoreOutlinedModule from '@mui/icons-material/UnfoldMoreOutline
 import * as VerticalAlignBottomOutlinedModule from '@mui/icons-material/VerticalAlignBottomOutlined';
 import * as VerticalAlignCenterOutlinedModule from '@mui/icons-material/VerticalAlignCenterOutlined';
 import * as VerticalAlignTopOutlinedModule from '@mui/icons-material/VerticalAlignTopOutlined';
-import ToggleButton from '@mui/material/ToggleButton';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, ToggleButton } from '@mui/material';
 
 import ColumnsContainerPropsSchema, {
   ColumnsContainerProps,
