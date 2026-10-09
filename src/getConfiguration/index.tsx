@@ -92,6 +92,28 @@ export async function loadSampleTemplate(sampleName: string): Promise<any> {
 }
 
 /**
+ * Decode a shared-template hash: `#z/` (deflate-raw + base64url, used by the MCP server's preview links),
+ * `#code/` or `#json/`. Returns null for anything else or on failure.
+ */
+export async function decodeTemplateHash(hash: string): Promise<any | null> {
+  if (hash.startsWith('#z/')) {
+    try {
+      const b64 = hash.slice(3).replace(/-/g, '+').replace(/_/g, '/');
+      const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+      const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      return JSON.parse(await new Response(stream).text());
+    } catch {
+      return null;
+    }
+  }
+  if (hash.startsWith('#code/') || hash.startsWith('#json/')) {
+    const config = getConfiguration(hash);
+    return config === EMPTY_EMAIL_MESSAGE ? null : config;
+  }
+  return null;
+}
+
+/**
  * Convert a JSON configuration to a hash URL
  * @param config - Email template configuration JSON
  * @param format - Encoding format: 'json' (URL-encoded) or 'code' (base64, shorter but encoded)

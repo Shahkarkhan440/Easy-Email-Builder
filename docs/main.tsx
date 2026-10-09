@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 
 import {
@@ -14,6 +14,7 @@ import { Box, SpeedDial, SpeedDialAction, SpeedDialIcon, Button } from '@mui/mat
 import EmailBuilder, { EmailBuilderRef, EmailBuilderVariableInput } from '../src/EmailBuilder';
 import HtmlEditor from '../src/HtmlEditor';
 import { TEditorConfiguration } from '../src/documents/editor/core';
+import { decodeTemplateHash } from '../src/getConfiguration';
 
 const testJSON = {
   "root": {
@@ -235,6 +236,13 @@ const Home = () => {
   const [variables, setVariables] = useState<EmailBuilderVariableInput[]>([]);
 
   const emailBuilderRef = useRef<EmailBuilderRef>(null);
+
+  // Open a template shared by link (#z/… from the MCP server's preview links, or #code/… from the Share button)
+  useEffect(() => {
+    decodeTemplateHash(window.location.hash).then((doc) => {
+      if (doc) setInitialDocument(doc as TEditorConfiguration);
+    });
+  }, []);
 
   const handleToggleJsonFeatures = () => {
     setShowJsonFeatures((prev) => !prev);
