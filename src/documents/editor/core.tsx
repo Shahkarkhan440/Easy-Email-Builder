@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { Button, ButtonPropsSchema } from 'monto-email-block-button';
 import { Divider, DividerPropsSchema } from 'monto-email-block-divider';
-import { Heading, HeadingPropsSchema } from 'monto-email-block-heading';
+import { Heading } from 'monto-email-block-heading';
 import { Html, HtmlPropsSchema } from 'monto-email-block-html';
 import { ImagePropsSchema } from 'monto-email-block-image';
 import { Spacer, SpacerPropsSchema } from 'monto-email-block-spacer';
@@ -26,6 +26,7 @@ import SocialsEditor from '../blocks/Socials/SocialsEditor';
 import SocialsPropsSchema, { type SocialsProps as LocalSocialsProps } from '../blocks/Socials/SocialsPropsSchema';
 import TextEditor from '../blocks/Text/TextEditor';
 import HeadingEditor from '../blocks/Heading/HeadingEditor';
+import HeadingPropsSchema from '../blocks/Heading/HeadingPropsSchema';
 import ButtonEditor from '../blocks/Button/ButtonEditor';
 import EditorBlockWrapper from '../blocks/helpers/block-wrappers/EditorBlockWrapper';
 

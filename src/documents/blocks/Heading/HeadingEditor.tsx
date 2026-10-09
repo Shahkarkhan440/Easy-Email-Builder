@@ -1,8 +1,23 @@
 import React, { useRef, useEffect, useCallback } from 'react';
-import { Heading, HeadingProps } from 'monto-email-block-heading';
+import { Heading } from 'monto-email-block-heading';
 import { Box } from '@mui/material';
 import { useCurrentBlockId } from '../../editor/EditorBlock';
 import { setDocument, useSelectedBlockId, editorStateStore } from '../../editor/EditorContext';
+
+import type { HeadingProps } from './HeadingPropsSchema';
+import { setHeadingCaretOffset } from './headingVariables';
+
+/** Caret offset (in characters of textContent) when the selection is inside `el` */
+function readCaretOffset(el: HTMLElement): number | null {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return null;
+  const r = sel.getRangeAt(0);
+  if (!el.contains(r.endContainer)) return null;
+  const pre = window.document.createRange();
+  pre.selectNodeContents(el);
+  pre.setEnd(r.endContainer, r.endOffset);
+  return pre.toString().length;
+}
 
 export default function HeadingEditor(props: HeadingProps) {
   const blockId = useCurrentBlockId();
@@ -65,6 +80,12 @@ export default function HeadingEditor(props: HeadingProps) {
           }
         }, 0);
         
+        // Remember the caret so the sidebar can insert variables there after the heading blurs
+        const handleSelectionChange = () => {
+          const offset = readCaretOffset(headingElement);
+          if (offset !== null) setHeadingCaretOffset(blockId, offset);
+        };
+
         const handleBlur = () => {
           isEditingRef.current = false;
           // Only update the document on blur so the browser keeps the caret
@@ -95,12 +116,14 @@ export default function HeadingEditor(props: HeadingProps) {
           e.stopPropagation();
         };
 
+        window.document.addEventListener('selectionchange', handleSelectionChange);
         headingElement.addEventListener('blur', handleBlur);
         headingElement.addEventListener('input', handleInput);
         headingElement.addEventListener('keydown', handleKeyDown);
         headingElement.addEventListener('click', handleClick);
 
         return () => {
+          window.document.removeEventListener('selectionchange', handleSelectionChange);
           if (headingElement) {
             headingElement.contentEditable = 'false';
             headingElement.style.cursor = '';
@@ -123,8 +146,8 @@ export default function HeadingEditor(props: HeadingProps) {
   }, [isSelected, blockId, updateDocument]);
 
   return (
-    <Box ref={headingRef}>
-      <Heading {...props} />
+    <Box ref={headingRef} data-monto-heading-block-id={blockId}>
+      <Heading {...(props as React.ComponentProps<typeof Heading>)} />
     </Box>
   );
 }

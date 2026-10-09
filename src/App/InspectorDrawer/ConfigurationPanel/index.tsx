@@ -63,7 +63,14 @@ export default function ConfigurationPanel() {
     case 'Divider':
       return <DividerSidebarPanel key={selectedBlockId} data={data} setData={(data) => setBlock({ type, data })} />;
     case 'Heading':
-      return <HeadingSidebarPanel key={selectedBlockId} data={data} setData={(data) => setBlock({ type, data })} />;
+      return (
+        <HeadingSidebarPanel
+          key={selectedBlockId}
+          blockId={selectedBlockId}
+          data={data}
+          setData={(data) => setBlock({ type, data })}
+        />
+      );
     case 'Html':
       return <HtmlSidebarPanel key={selectedBlockId} data={data} setData={(data) => setBlock({ type, data })} />;
     case 'Image':

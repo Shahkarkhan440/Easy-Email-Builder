@@ -1,5 +1,7 @@
 import { getResolvedTextBodyHtml, type TextProps } from 'monto-email-block-text';
 
+import type { HeadingProps } from '../blocks/Heading/HeadingPropsSchema';
+import { extractHeadingVariableTokens, headingVariableInstanceId } from '../blocks/Heading/headingVariables';
 import { extractInsertedVariableOccurrencesFromHtmlString } from '../blocks/Text/textDom';
 
 import type { TEditorBlock, TEditorConfiguration } from './core';
@@ -7,7 +9,7 @@ import type { TEditorBlock, TEditorConfiguration } from './core';
 export type EmailTemplateVariableItem = {
   /** Document-wide incrementing id, starting at 1 */
   id: number;
-  /** Matches the span's `data-variable-instance-id`; links to variableDefaults */
+  /** Matches the span's `data-variable-instance-id` (Heading: `heading:<blockId>:<name>`); links to variableDefaults */
   variableInstanceId: string;
   /** Full token: `{{name}}` or `{%name%}` */
   variable: string;
@@ -180,10 +182,11 @@ function walkFrom(
 }
 
 /**
- * Collect inserted variables (span[data-text-variable]) from Text blocks in the document:
+ * Collect variables from the document:
+ * - Text blocks: inserted variables (span[data-text-variable]); hand-typed `{{}}` / `{% %}` text is ignored. Multi-paragraph HTML is scanned within body.
+ * - Heading blocks: `{{name}}` / `{%name%}` tokens in the plain heading text, one row per name per heading.
  * - `{{name}}`: default comes from variableDefaults;
  * - `{%name%}`: built-in, default is always `''`.
- * Hand-typed `{{}}` / `{% %}` text is ignored. Multi-paragraph HTML is scanned within body.
  */
 export function collectTemplateVariablesFromDocument(
   document: TEditorConfiguration,
@@ -193,7 +196,27 @@ export function collectTemplateVariablesFromDocument(
   let idCounter = 0;
   const defaultsByInstanceId = new Map<string, string>();
 
-  const visit = (_blockId: string, block: TEditorBlock) => {
+  const visit = (blockId: string, block: TEditorBlock) => {
+    if (block.type === 'Heading') {
+      const props = (block.data as HeadingProps).props;
+      const vd = props?.variableDefaults ?? {};
+      const seenNames = new Set<string>();
+      for (const { name, builtin } of extractHeadingVariableTokens(props?.text)) {
+        const key = `${builtin ? '%' : '{'}${name}`;
+        if (seenNames.has(key)) continue;
+        seenNames.add(key);
+        idCounter += 1;
+        rows.push({
+          id: idCounter,
+          variableInstanceId: headingVariableInstanceId(blockId, name),
+          variable: builtin ? `{%${name}%}` : `{{${name}}}`,
+          type: builtin ? 'system' : 'user',
+          attribute: name,
+          default: builtin ? '' : vd[name] == null ? '' : String(vd[name]),
+        });
+      }
+      return;
+    }
     if (block.type !== 'Text') return;
     const data = block.data as TextProps;
     const vd = data.props?.variableDefaults;
@@ -232,7 +255,7 @@ export function collectTemplateVariablesFromDocument(
 }
 
 /**
- * Merge external variable defaults into the document; only affects inserted variable spans (with `data-variable-instance-id`).
+ * Merge external variable defaults into the document; only affects inserted variable spans (with `data-variable-instance-id`) and Heading `{{name}}` tokens.
  * - input with `variableInstanceId`: only that instance is written;
  * - otherwise the name is resolved from `attribute` / `variable` and the `default` is written to **all** `{{name}}` instances (built-in `{%name%}` is never matched by name).
  * Names or ids not in the body are ignored; instances not in the input keep their variableDefaults.
@@ -263,6 +286,27 @@ export function applyExternalVariableDefaultsToDocument(
   let docChanged = false;
 
   const visit = (blockId: string, block: TEditorBlock) => {
+    if (block.type === 'Heading') {
+      const data = block.data as HeadingProps;
+      const vd = { ...(data.props?.variableDefaults ?? {}) } as Record<string, string>;
+      let blockChanged = false;
+      for (const { name, builtin } of extractHeadingVariableTokens(data.props?.text)) {
+        if (builtin) continue;
+        const iid = headingVariableInstanceId(blockId, name);
+        const val = byInstanceId.has(iid) ? byInstanceId.get(iid) : byAttribute.get(name);
+        if (val === undefined || vd[name] === val) continue;
+        vd[name] = val;
+        blockChanged = true;
+      }
+      if (blockChanged) {
+        docChanged = true;
+        nextDoc[blockId] = {
+          ...block,
+          data: { ...data, props: { ...(data.props as object), variableDefaults: vd } },
+        } as TEditorBlock;
+      }
+      return;
+    }
     if (block.type !== 'Text') return;
     const data = block.data as TextProps;
     const html = getResolvedTextBodyHtml(data.props ?? null);

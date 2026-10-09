@@ -15,9 +15,7 @@ import {
   markLastInlineStyleApply,
   setDocument,
   setTextSelection,
-  useDocument,
   useLastTextBlockContent,
-  useContactAttributes,
   useTextCaret,
   useTextSelection,
   queueTextDomApply,
@@ -30,13 +28,16 @@ import {
 } from '../../../../documents/blocks/Text/textDom';
 import type { TEditorConfiguration } from '../../../../documents/editor/core';
 import {
-  BASE_VARIABLE_GROUPS,
   CustomVariableDefinition,
   VARIABLE_NAME_RE,
-  VariableGroup,
   VariableGroupId,
   requiresVariableDefault,
 } from '../../../../documents/blocks/Text/variableCatalog';
+import {
+  getBlockCustomVariables,
+  getVariableGroupTitleKey,
+  useVariableGroups,
+} from '../../../../documents/blocks/Text/useVariableGroups';
 import { TStyle } from '../../../../documents/blocks/helpers/TStyle';
 
 import BaseSidebarPanel from './helpers/BaseSidebarPanel';
@@ -77,8 +78,6 @@ const SELECTION_AWARE_NAMES: (keyof TStyle)[] = [
 const GLOBAL_NAMES: (keyof TStyle)[] = ['lineHeight', 'textAlign', 'padding'];
 
 type LinkKind = 'web' | 'email';
-
-const VARIABLE_GROUPS: VariableGroup[] = BASE_VARIABLE_GROUPS;
 
 type TextSidebarPanelProps = {
   blockId: string;
@@ -137,30 +136,6 @@ function renameInsertedCustomVariableInHtml(
   };
 }
 
-function getBlockCustomVariables(block: unknown): CustomVariableDefinition[] {
-  const vars = (block as any)?.data?.props?.customVariables;
-  if (!Array.isArray(vars)) return [];
-  return vars
-    .map((cv) => {
-      const name = typeof cv?.name === 'string' ? cv.name.trim() : '';
-      if (!name || !VARIABLE_NAME_RE.test(name)) return null;
-      const label = typeof cv?.label === 'string' && cv.label.trim() ? cv.label.trim() : name;
-      return { name, label };
-    })
-    .filter((cv): cv is CustomVariableDefinition => !!cv);
-}
-
-function collectCustomVariablesFromDocument(document: TEditorConfiguration): CustomVariableDefinition[] {
-  const byName = new Map<string, CustomVariableDefinition>();
-  for (const block of Object.values(document)) {
-    if (block.type !== 'Text') continue;
-    for (const cv of getBlockCustomVariables(block)) {
-      if (!byName.has(cv.name)) byName.set(cv.name, cv);
-    }
-  }
-  return Array.from(byName.values());
-}
-
 function buildCustomVariablesDocumentPatch(
   document: TEditorConfiguration,
   nextCustomVariables: CustomVariableDefinition[],
@@ -204,64 +179,11 @@ function buildCustomVariablesDocumentPatch(
 export default function TextSidebarPanel({ blockId, data, setData }: TextSidebarPanelProps) {
   const { t } = useTranslation();
   const [, setErrors] = useState<ZodError | null>(null);
-  const document = useDocument();
   const textSelection = useTextSelection();
   const textCaret = useTextCaret();
   const lastTextBlockContent = useLastTextBlockContent();
-  const contactAttributes = useContactAttributes();
 
-  const variableGroups = useMemo(() => {
-    const safeField = (s: unknown) => (typeof s === 'string' ? s.trim() : '');
-    const custom = (Array.isArray(contactAttributes) ? contactAttributes : [])
-      .filter((a) => {
-        const f = safeField((a as any)?.AttrField);
-        if (!f) return false;
-        const en = (a as any)?.Enable;
-        if (en === 0 || en === false) return false;
-        return true;
-      })
-      .map((a) => {
-        const f = safeField((a as any)?.AttrField);
-        const label =
-          safeField((a as any)?.AttrComment) ||
-          safeField((a as any)?.Name) ||
-          f;
-        return { name: f, labelKey: label, kind: 'user' as const, isCustomLabel: true };
-      });
-
-    const base = VARIABLE_GROUPS.map((g) => ({
-      ...g,
-      items: g.items.map((it) => ({ ...it, isCustomLabel: false as const })),
-    }));
-
-    const contacts = base.find((g) => g.id === 'contacts');
-    if (contacts) {
-      const existing = new Set(contacts.items.map((i) => i.name));
-      for (const it of custom) {
-        if (!existing.has(it.name)) contacts.items.push(it as any);
-      }
-    }
-    return base as Array<
-      (typeof base)[number] & {
-        items: Array<(typeof base)[number]['items'][number] & { isCustomLabel: boolean }>;
-      }
-    >;
-  }, [contactAttributes]);
-
-  const customVariables: CustomVariableDefinition[] = useMemo(() => collectCustomVariablesFromDocument(document), [document]);
-
-  const variableGroupsWithCustom = useMemo(() => {
-    const customGroup = {
-      id: 'custom' as const,
-      items: customVariables.map((cv) => ({
-        name: cv.name,
-        labelKey: cv.label || cv.name,
-        kind: 'user' as const,
-        isCustomLabel: true,
-      })),
-    };
-    return [customGroup, ...variableGroups];
-  }, [customVariables, variableGroups]);
+  const { variableGroups, customVariables, variableGroupsWithCustom } = useVariableGroups();
 
   const updateCustomVariables = useCallback(
     (next: CustomVariableDefinition[]) => {
@@ -1006,18 +928,7 @@ export default function TextSidebarPanel({ blockId, data, setData }: TextSidebar
           {variableStage === 'pick' ? (
             <Box>
               {variableGroupsWithCustom.map((g) => {
-                const titleKey =
-                  g.id === 'custom'
-                    ? 'text.variables.groupCustom'
-                    : g.id === 'contacts'
-                      ? 'text.variables.groupContacts'
-                      : g.id === 'email'
-                        ? 'text.variables.groupEmail'
-                        : g.id === 'organization'
-                          ? 'text.variables.groupOrganization'
-                          : g.id === 'date'
-                            ? 'text.variables.groupDate'
-                            : 'text.variables.groupLinks';
+                const titleKey = getVariableGroupTitleKey(g.id);
 
                 const expanded = variableExpanded === g.id;
 
