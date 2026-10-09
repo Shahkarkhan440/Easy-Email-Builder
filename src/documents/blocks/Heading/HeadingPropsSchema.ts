@@ -13,6 +13,8 @@ const HeadingPropsSchema = BaseHeadingPropsSchema.extend({
       text: z.string().optional().nullable(),
       level: z.enum(['h1', 'h2', 'h3']).optional().nullable(),
       variableDefaults: z.record(z.string()).optional().nullable(),
+      /** Document-wide custom variable list, mirrored on Text and Heading blocks */
+      customVariables: z.array(z.object({ name: z.string(), label: z.string() })).optional().nullable(),
     })
     .optional()
     .nullable(),

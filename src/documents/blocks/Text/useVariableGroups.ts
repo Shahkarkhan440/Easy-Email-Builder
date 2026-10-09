@@ -21,11 +21,11 @@ export function getBlockCustomVariables(block: unknown): CustomVariableDefinitio
     .filter((cv): cv is CustomVariableDefinition => !!cv);
 }
 
-/** Custom variables are stored on Text blocks (`props.customVariables`); merge them document-wide by name */
+/** Custom variables are stored on Text and Heading blocks (`props.customVariables`); merge them document-wide by name */
 export function collectCustomVariablesFromDocument(document: TEditorConfiguration): CustomVariableDefinition[] {
   const byName = new Map<string, CustomVariableDefinition>();
   for (const block of Object.values(document)) {
-    if (block.type !== 'Text') continue;
+    if (block.type !== 'Text' && block.type !== 'Heading') continue;
     for (const cv of getBlockCustomVariables(block)) {
       if (!byName.has(cv.name)) byName.set(cv.name, cv);
     }

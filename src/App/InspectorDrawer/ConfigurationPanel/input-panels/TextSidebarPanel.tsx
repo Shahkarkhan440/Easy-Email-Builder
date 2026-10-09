@@ -26,15 +26,14 @@ import {
   getLinkInRangeFromHtmlString,
   readInlineStyleInRangeFromHtmlString,
 } from '../../../../documents/blocks/Text/textDom';
-import type { TEditorConfiguration } from '../../../../documents/editor/core';
 import {
   CustomVariableDefinition,
   VARIABLE_NAME_RE,
   VariableGroupId,
   requiresVariableDefault,
 } from '../../../../documents/blocks/Text/variableCatalog';
+import { buildCustomVariablesDocumentPatch } from '../../../../documents/blocks/Text/customVariables';
 import {
-  getBlockCustomVariables,
   getVariableGroupTitleKey,
   useVariableGroups,
 } from '../../../../documents/blocks/Text/useVariableGroups';
@@ -84,97 +83,6 @@ type TextSidebarPanelProps = {
   data: TextProps;
   setData: (v: TextProps) => void;
 };
-
-function buildTextVariablesFromHtml(html: string) {
-  return extractInsertedVariableOccurrencesFromHtmlString(html)
-    .filter((o) => o.instanceId)
-    .map((o) => ({
-      variableInstanceId: o.instanceId,
-      attribute: o.name,
-      variable: o.builtin ? `{%${o.name}%}` : `{{${o.name}}}`,
-      type: o.builtin ? 'system' : 'user',
-    }));
-}
-
-function buildMessageFromTextHtml(html: string): string {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  const root = doc.body.firstElementChild ?? doc.body;
-  const ps = Array.from(root.querySelectorAll('p')) as HTMLParagraphElement[];
-  if (ps.length === 0) return (root.textContent ?? '').replace(/\u200B/g, '');
-  return ps
-    .map((p) => {
-      const text = (p.textContent ?? '').replace(/\u200B/g, '');
-      if (text.length === 0 && p.querySelector('br')) return '';
-      return text;
-    })
-    .join('\n');
-}
-
-function renameInsertedCustomVariableInHtml(
-  html: string,
-  oldName: string,
-  newName: string,
-): { html: string; message: string; variables: ReturnType<typeof buildTextVariablesFromHtml> } | null {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  const oldToken = `{{${oldName}}}`;
-  const newToken = `{{${newName}}}`;
-  let changed = false;
-
-  for (const el of Array.from(doc.body.querySelectorAll('[data-text-variable]')) as HTMLElement[]) {
-    if ((el.getAttribute('data-text-variable') ?? '').trim() !== oldToken) continue;
-    el.setAttribute('data-text-variable', newToken);
-    el.textContent = newToken;
-    changed = true;
-  }
-
-  if (!changed) return null;
-  const nextHtml = doc.body.firstElementChild?.outerHTML ?? doc.body.innerHTML;
-  return {
-    html: nextHtml,
-    message: buildMessageFromTextHtml(nextHtml),
-    variables: buildTextVariablesFromHtml(nextHtml),
-  };
-}
-
-function buildCustomVariablesDocumentPatch(
-  document: TEditorConfiguration,
-  nextCustomVariables: CustomVariableDefinition[],
-  rename?: { oldName: string; newName: string },
-): Partial<TEditorConfiguration> {
-  const updates: Partial<TEditorConfiguration> = {};
-
-  for (const [id, block] of Object.entries(document)) {
-    if (block.type !== 'Text') continue;
-    const currentProps = ((block.data as any).props ?? {}) as Record<string, unknown>;
-    const renamedBody = rename
-      ? renameInsertedCustomVariableInHtml(
-          getResolvedTextBodyHtml(currentProps as TextProps['props']),
-          rename.oldName,
-          rename.newName,
-        )
-      : null;
-
-    updates[id] = {
-      ...block,
-      data: {
-        ...block.data,
-        props: {
-          ...currentProps,
-          customVariables: nextCustomVariables,
-          ...(renamedBody
-            ? {
-                html: renamedBody.html,
-                message: renamedBody.message,
-                variables: renamedBody.variables,
-              }
-            : {}),
-        },
-      },
-    } as any;
-  }
-
-  return updates;
-}
 
 export default function TextSidebarPanel({ blockId, data, setData }: TextSidebarPanelProps) {
   const { t } = useTranslation();
