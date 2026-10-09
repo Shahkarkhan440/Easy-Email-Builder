@@ -1,0 +1,32 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Shahkarkhan440/easy-email-builder",
+  "title": "Easy Email Builder",
+  "description": "Design HTML email templates with AI: render to HTML and open them in a visual editor",
+  "websiteUrl": "https://shahkarkhan440.github.io/Easy-Email-Builder/",
+  "repository": {
+    "url": "https://github.com/Shahkarkhan440/Easy-Email-Builder",
+    "source": "github",
+    "subfolder": "mcp"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "easy-email-builder-mcp",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "EASY_EMAIL_BUILDER_EDITOR_URL",
+          "description": "Editor URL for preview links, if you host the editor yourself. Defaults to the public demo.",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}
