@@ -9,68 +9,22 @@ Let AI assistants (Claude, Cursor, VS Code, …) design HTML email templates wit
 
 ## Add it to your AI agent
 
-Works with any agent that supports MCP servers running locally. Requires Node.js 18+.
+Works with any agent that supports local MCP servers. The command-line setups need Node.js 18+.
+
+### Claude Desktop: one-click extension (easiest)
+
+1. Download **[easy-email-builder.mcpb](https://github.com/Shahkarkhan440/Easy-Email-Builder/releases/latest/download/easy-email-builder.mcpb)**.
+2. Double-click it (or drag it into Claude Desktop → Settings → Extensions) and click **Install**.
+
+No Node.js or config editing needed: Claude Desktop runs it with its built-in Node.
 
 ### Claude Code
 
 ```bash
-claude mcp add easy-email-builder -- npx -y easy-email-builder-mcp
+claude mcp add easy-email-builder --scope user -- npx -y easy-email-builder-mcp
 ```
 
-### Claude Desktop
-
-Settings → Developer → Edit Config, add the server, then restart Claude Desktop:
-
-```json
-{
-  "mcpServers": {
-    "easy-email-builder": {
-      "command": "npx",
-      "args": ["-y", "easy-email-builder-mcp"]
-    }
-  }
-}
-```
-
-If the server fails to start with `spawn npx ENOENT` or `env: node: No such file or directory` (common with nvm, because Claude Desktop doesn't load your shell's PATH), use the full path from `which npx` as the `command` and add your Node folder to `PATH`:
-
-```json
-{
-  "mcpServers": {
-    "easy-email-builder": {
-      "command": "/Users/you/.nvm/versions/node/v22.0.0/bin/npx",
-      "args": ["-y", "easy-email-builder-mcp"],
-      "env": { "PATH": "/Users/you/.nvm/versions/node/v22.0.0/bin:/usr/local/bin:/usr/bin:/bin" }
-    }
-  }
-}
-```
-
-### Cursor, Windsurf, Gemini CLI, Cline and others
-
-Use the same `mcpServers` entry as above in the client's MCP config:
-
-| Client | Config file |
-|---|---|
-| Cursor | `~/.cursor/mcp.json` (or `.cursor/mcp.json` in a project) |
-| Windsurf | `~/.codeium/windsurf/mcp_config.json` |
-| Gemini CLI | `~/.gemini/settings.json` |
-| Cline / Roo Code | MCP Servers panel → Configure |
-
-### VS Code (GitHub Copilot)
-
-`.vscode/mcp.json` in your project:
-
-```json
-{
-  "servers": {
-    "easy-email-builder": {
-      "command": "npx",
-      "args": ["-y", "easy-email-builder-mcp"]
-    }
-  }
-}
-```
+`--scope user` makes it available in all your projects; leave it out to add it to the current project only.
 
 ### OpenAI Codex
 
@@ -84,6 +38,67 @@ or in `~/.codex/config.toml`:
 [mcp_servers.easy-email-builder]
 command = "npx"
 args = ["-y", "easy-email-builder-mcp"]
+```
+
+### VS Code (GitHub Copilot)
+
+```bash
+code --add-mcp '{"name":"easy-email-builder","command":"npx","args":["-y","easy-email-builder-mcp"]}'
+```
+
+or `.vscode/mcp.json` in your project:
+
+```json
+{
+  "servers": {
+    "easy-email-builder": {
+      "command": "npx",
+      "args": ["-y", "easy-email-builder-mcp"]
+    }
+  }
+}
+```
+
+### Gemini CLI
+
+```bash
+gemini mcp add easy-email-builder npx -y easy-email-builder-mcp
+```
+
+### Cursor, Windsurf, Cline and others
+
+Add this to the client's MCP config:
+
+```json
+{
+  "mcpServers": {
+    "easy-email-builder": {
+      "command": "npx",
+      "args": ["-y", "easy-email-builder-mcp"]
+    }
+  }
+}
+```
+
+| Client | Config file |
+|---|---|
+| Cursor | `~/.cursor/mcp.json` (or `.cursor/mcp.json` in a project) |
+| Windsurf | `~/.codeium/windsurf/mcp_config.json` |
+| Cline / Roo Code | MCP Servers panel → Configure |
+| Claude Desktop (manual) | Settings → Developer → Edit Config |
+
+If the server fails to start with `spawn npx ENOENT` or `env: node: No such file or directory` (common with nvm, because desktop apps don't load your shell's PATH), use the full path from `which npx` as the `command` and add your Node folder to `PATH`:
+
+```json
+{
+  "mcpServers": {
+    "easy-email-builder": {
+      "command": "/Users/you/.nvm/versions/node/v22.0.0/bin/npx",
+      "args": ["-y", "easy-email-builder-mcp"],
+      "env": { "PATH": "/Users/you/.nvm/versions/node/v22.0.0/bin:/usr/local/bin:/usr/bin:/bin" }
+    }
+  }
+}
 ```
 
 > **ChatGPT and claude.ai (web):** these only connect to MCP servers hosted at a URL. This server runs on your machine, so use it from Claude Desktop, Claude Code, Codex or one of the clients above.
@@ -120,11 +135,19 @@ The server reuses the editor's own code from `../src` (rendering, templates, var
 ```bash
 pnpm install            # in the repo root (email block packages)
 cd mcp && pnpm install
-pnpm test               # build + end-to-end test over stdio
+pnpm test               # build, pack the extension, end-to-end tests over stdio
+pnpm pack:extension     # build dist/easy-email-builder.mcpb (Claude Desktop extension)
 pnpm typecheck
 ```
 
 Try it with the MCP Inspector: `npx @modelcontextprotocol/inspector node dist/index.js`.
+
+### Releasing
+
+1. Set the same version in `package.json` and in `server.json` (`version` and `packages[0].version`). The extension takes its version from `package.json`.
+2. `pnpm test`, then `npm publish --otp=<code>`.
+3. `mcp-publisher publish` (after npm: the registry checks the npm package).
+4. Create a GitHub release and attach `dist/easy-email-builder.mcpb` (keep that file name: the README's download link points to the latest release's `easy-email-builder.mcpb`).
 
 ## License
 

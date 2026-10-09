@@ -17,13 +17,33 @@ A drag-and-drop email template editor for React.
 
 Add Easy Email Builder to your favorite AI agent as an MCP server, then ask it to design an email. It returns the email HTML and a link that opens the result in the visual editor.
 
+**Claude Desktop**: download the one-click extension **[easy-email-builder.mcpb](https://github.com/Shahkarkhan440/Easy-Email-Builder/releases/latest/download/easy-email-builder.mcpb)**, double-click it and click **Install**.
+
 **Claude Code**
 
 ```bash
-claude mcp add easy-email-builder -- npx -y easy-email-builder-mcp
+claude mcp add easy-email-builder --scope user -- npx -y easy-email-builder-mcp
 ```
 
-**Claude Desktop, Cursor, Windsurf, Gemini CLI and most other MCP clients**: add to the client's MCP config:
+**OpenAI Codex**
+
+```bash
+codex mcp add easy-email-builder -- npx -y easy-email-builder-mcp
+```
+
+**VS Code (GitHub Copilot)**
+
+```bash
+code --add-mcp '{"name":"easy-email-builder","command":"npx","args":["-y","easy-email-builder-mcp"]}'
+```
+
+**Gemini CLI**
+
+```bash
+gemini mcp add easy-email-builder npx -y easy-email-builder-mcp
+```
+
+**Cursor, Windsurf, Cline and other MCP clients**: add to the client's MCP config:
 
 ```json
 {
@@ -36,7 +56,7 @@ claude mcp add easy-email-builder -- npx -y easy-email-builder-mcp
 }
 ```
 
-Setup for VS Code, OpenAI Codex and more: see the [MCP server README](./mcp/README.md).
+Config file locations and troubleshooting: see the [MCP server README](./mcp/README.md).
 
 ## Install
 

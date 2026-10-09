@@ -1,6 +1,6 @@
 {
   "name": "easy-email-builder-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for Easy Email Builder: generate email templates with AI, render them to HTML, and get a link to open them in the visual editor",
   "keywords": [
     "mcp",
@@ -24,7 +24,7 @@
     "easy-email-builder-mcp": "dist/index.js"
   },
   "files": [
-    "dist"
+    "dist/index.js"
   ],
   "engines": {
     "node": ">=18"
@@ -32,10 +32,12 @@
   "scripts": {
     "build": "node build.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "node build.mjs && node test/smoke.mjs",
-    "prepublishOnly": "npm run typecheck && npm run build"
+    "test": "node build.mjs && node pack-extension.mjs && node test/smoke.mjs",
+    "prepublishOnly": "npm run typecheck && npm run build",
+    "pack:extension": "node build.mjs && node pack-extension.mjs"
   },
   "devDependencies": {
+    "@anthropic-ai/mcpb": "2.1.2",
     "@modelcontextprotocol/sdk": "1.30.1",
     "@types/node": "^22.0.0",
     "esbuild": "^0.21.5",

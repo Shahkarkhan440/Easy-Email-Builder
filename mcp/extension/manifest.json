@@ -1,0 +1,54 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/mcpb/main/schemas/mcpb-manifest-v0.3.schema.json",
+  "manifest_version": "0.3",
+  "name": "easy-email-builder",
+  "display_name": "Easy Email Builder",
+  "version": "0.0.0",
+  "description": "Design HTML email templates with AI: render to HTML and open them in a visual editor",
+  "long_description": "Ask Claude to design an email and get the final HTML, the template's variables ({{first_name}}, {%unsubscribe_link%}, …) with fallback values, and a preview link that opens the email in the Easy Email Builder visual editor, where you can keep editing and export it. Start from 31 starter templates (welcome, newsletter, order confirmation, password reset, …) or describe a new one. Templates are compressed into the preview link itself; nothing is uploaded or stored on a server.",
+  "author": {
+    "name": "shahkar khan",
+    "url": "https://github.com/Shahkarkhan440"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Shahkarkhan440/Easy-Email-Builder"
+  },
+  "homepage": "https://shahkarkhan440.github.io/Easy-Email-Builder/",
+  "documentation": "https://github.com/Shahkarkhan440/Easy-Email-Builder/tree/main/mcp#readme",
+  "support": "https://github.com/Shahkarkhan440/Easy-Email-Builder/issues",
+  "icon": "icon.png",
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.mjs",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.mjs"],
+      "env": {
+        "EASY_EMAIL_BUILDER_EDITOR_URL": "${user_config.editor_url}"
+      }
+    }
+  },
+  "tools": [
+    { "name": "get_block_reference", "description": "The template format: blocks, properties, colors, variables" },
+    { "name": "list_templates", "description": "Starter email templates and built-in header/footer ids" },
+    { "name": "get_template", "description": "A starter template to adapt" },
+    { "name": "build_email", "description": "Validate a template, render the email HTML, list its variables and return a preview link" }
+  ],
+  "user_config": {
+    "editor_url": {
+      "type": "string",
+      "title": "Editor URL (optional)",
+      "description": "Where preview links open, if you host the editor yourself. Leave empty to use the public editor.",
+      "required": false
+    }
+  },
+  "keywords": ["email", "email-template", "html-email", "newsletter", "email-builder"],
+  "license": "MIT",
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  }
+}

@@ -24,11 +24,17 @@ export function collectVariables(document: EmailDocument) {
   }));
 }
 
+/** EASY_EMAIL_BUILDER_EDITOR_URL when it is an http(s) URL; extension hosts may pass an empty or unfilled value */
+function configuredEditorUrl(): string {
+  const url = (process.env.EASY_EMAIL_BUILDER_EDITOR_URL ?? '').trim();
+  return /^https?:\/\//i.test(url) ? url : DEFAULT_EDITOR_URL;
+}
+
 /**
  * Link that opens the template in the hosted editor: `#z/` + base64url(deflate-raw(JSON)).
  * The editor decodes it with the browser's DecompressionStream.
  */
-export function buildPreviewLink(document: EmailDocument, editorUrl = process.env.EASY_EMAIL_BUILDER_EDITOR_URL || DEFAULT_EDITOR_URL): string {
+export function buildPreviewLink(document: EmailDocument, editorUrl = configuredEditorUrl()): string {
   const compressed = deflateRawSync(Buffer.from(JSON.stringify(document), 'utf8'), { level: 9 });
   const base = editorUrl.split('#')[0];
   return `${base}#z/${compressed.toString('base64url')}`;

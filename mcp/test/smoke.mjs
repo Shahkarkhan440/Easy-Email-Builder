@@ -1,7 +1,8 @@
 // End-to-end check: start the built server over stdio and call every tool through a real MCP client.
 import assert from 'node:assert/strict';
 import { inflateRawSync } from 'node:zlib';
-import { mkdtempSync, readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { existsSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -142,4 +143,34 @@ await test('build_email warns about variables without a fallback', async () => {
 });
 
 await client.close();
+
+/** Start a server process with extra env vars and return the preview link it builds */
+async function previewUrlWith(env, args = [new URL('../dist/index.js', import.meta.url).pathname]) {
+  const c = new Client({ name: 'smoke-test-env', version: '0.0.0' });
+  await c.connect(new StdioClientTransport({ command: process.execPath, args, env: { ...process.env, ...env } }));
+  const res = await c.callTool({ name: 'build_email', arguments: { template: { blocks: [] }, include: [] } });
+  await c.close();
+  return JSON.parse(res.content[0].text).previewUrl;
+}
+
+await test('EASY_EMAIL_BUILDER_EDITOR_URL sets the preview link base; empty or unfilled values fall back', async () => {
+  assert.ok((await previewUrlWith({ EASY_EMAIL_BUILDER_EDITOR_URL: 'http://localhost:5173/' })).startsWith('http://localhost:5173/#z/'));
+  for (const value of ['', '${user_config.editor_url}']) {
+    assert.ok((await previewUrlWith({ EASY_EMAIL_BUILDER_EDITOR_URL: value })).startsWith('https://shahkarkhan440.github.io/Easy-Email-Builder/#z/'));
+  }
+});
+
+const mcpbFile = new URL('../dist/easy-email-builder.mcpb', import.meta.url).pathname;
+if (existsSync(mcpbFile)) {
+  await test('the Claude Desktop extension runs from its unpacked bundle', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'eeb-mcpb-'));
+    execFileSync(new URL('../node_modules/.bin/mcpb', import.meta.url).pathname, ['unpack', mcpbFile, dir], { stdio: 'ignore' });
+    const manifest = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8'));
+    assert.equal(manifest.version, JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version);
+    // Same command Claude Desktop runs: node ${__dirname}/server/index.js, with the editor URL left empty
+    const args = manifest.server.mcp_config.args.map((a) => a.replace('${__dirname}', dir));
+    assert.ok((await previewUrlWith({ EASY_EMAIL_BUILDER_EDITOR_URL: '' }, args)).includes('#z/'));
+  });
+}
+
 console.log(`\n${passed} passed`);
