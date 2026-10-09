@@ -2,6 +2,10 @@
 
 A drag-and-drop email template editor for React.
 
+**[Live demo](https://shahkarkhan440.github.io/Easy-Email-Builder/)**
+
+![Easy Email Builder editor](https://raw.githubusercontent.com/Shahkarkhan440/Easy-Email-Builder/main/.github/assets/screenshot.png)
+
 - Visual editor with text, image, button, video, socials, columns and more
 - Export to HTML and JSON
 - Locked header and footer with ready-made templates
