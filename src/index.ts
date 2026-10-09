@@ -1,14 +1,14 @@
 /**
- * EmailBuilder Pro - email template editor component library
+ * Easy Email Builder - email template editor component library
  *
  * A full-featured email template editor for use in React projects
  * 
  * Backwards compatible: all existing imports keep working
- * - import { EmailBuilder } from 'emailbuilder-pro' ✅
- * - import EmailBuilder from 'emailbuilder-pro' ✅
+ * - import { EmailBuilder } from 'easy-email-builder' ✅
+ * - import EmailBuilder from 'easy-email-builder' ✅
  * 
  * Load HtmlEditor on demand (recommended, lazy-loads CodeMirror):
- * - import { HtmlEditor } from 'emailbuilder-pro/html-editor' ✅
+ * - import { HtmlEditor } from 'easy-email-builder/html-editor' ✅
  */
 
 // Named exports
@@ -20,7 +20,7 @@ export type {
   EmailTemplateVariableItem,
 } from './EmailBuilder';
 
-// Default export (import EmailBuilder from 'emailbuilder-pro')
+// Default export (import EmailBuilder from 'easy-email-builder')
 export { default } from './EmailBuilder';
 
 // Type exports

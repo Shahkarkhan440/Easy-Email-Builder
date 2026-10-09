@@ -3,13 +3,13 @@
 ## Install
 
 ```bash
-npm install emailbuilder-pro
+npm install easy-email-builder
 ```
 
 ## Basic
 
 ```tsx
-import { EmailBuilder } from 'emailbuilder-pro';
+import { EmailBuilder } from 'easy-email-builder';
 
 function App() {
   return (
@@ -23,7 +23,7 @@ function App() {
 ## With an initial document
 
 ```tsx
-import { EmailBuilder, TEditorConfiguration } from 'emailbuilder-pro';
+import { EmailBuilder, TEditorConfiguration } from 'easy-email-builder';
 
 function App() {
   const initialDocument: TEditorConfiguration = {
@@ -46,7 +46,7 @@ function App() {
 ## Listen for changes
 
 ```tsx
-import { EmailBuilder, TEditorConfiguration } from 'emailbuilder-pro';
+import { EmailBuilder, TEditorConfiguration } from 'easy-email-builder';
 
 function App() {
   const handleChange = (document: TEditorConfiguration, html: string) => {
@@ -65,7 +65,7 @@ function App() {
 ## Image upload
 
 ```tsx
-import { EmailBuilder } from 'emailbuilder-pro';
+import { EmailBuilder } from 'easy-email-builder';
 
 function App() {
   const handleImageUpload = async (file: File): Promise<string> => {
@@ -87,7 +87,7 @@ function App() {
 ## Read the current document
 
 ```tsx
-import { useDocument } from 'emailbuilder-pro';
+import { useDocument } from 'easy-email-builder';
 
 function ExportButton() {
   const document = useDocument();
@@ -98,5 +98,5 @@ function ExportButton() {
 ## Types
 
 ```tsx
-import type { EmailBuilderProps, TEditorConfiguration, TEditorBlock } from 'emailbuilder-pro';
+import type { EmailBuilderProps, TEditorConfiguration, TEditorBlock } from 'easy-email-builder';
 ```

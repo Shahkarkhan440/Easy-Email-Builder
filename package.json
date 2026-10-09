@@ -1,7 +1,7 @@
 {
-  "name": "emailbuilder-pro",
+  "name": "easy-email-builder",
   "version": "1.0.0",
-  "description": "EmailBuilder Pro - a drag-and-drop email template editor for React",
+  "description": "Easy Email Builder - a drag-and-drop email template editor for React",
   "keywords": [
     "email",
     "email-builder",

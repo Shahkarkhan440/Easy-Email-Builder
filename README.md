@@ -1,4 +1,4 @@
-# EmailBuilder Pro
+# Easy Email Builder
 
 A drag-and-drop email template editor for React.
 
@@ -11,7 +11,7 @@ A drag-and-drop email template editor for React.
 ## Install
 
 ```bash
-npm install emailbuilder-pro
+npm install easy-email-builder
 ```
 
 Peer dependencies:
@@ -25,7 +25,7 @@ npm install react react-dom @mui/material @mui/icons-material @emotion/react @em
 Give the editor a container with a fixed height:
 
 ```tsx
-import { EmailBuilder } from 'emailbuilder-pro';
+import { EmailBuilder } from 'easy-email-builder';
 
 export default function App() {
   return (
@@ -64,7 +64,7 @@ ref.current?.getData((json, html) => save(json, html));
 An HTML-only code editor is also available:
 
 ```tsx
-import { HtmlEditor } from 'emailbuilder-pro/html-editor';
+import { HtmlEditor } from 'easy-email-builder/html-editor';
 ```
 
 ## Development

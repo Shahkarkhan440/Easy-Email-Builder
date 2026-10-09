@@ -173,7 +173,7 @@ export type { EmailBuilderVariableInput, EmailTemplateVariableItem };
  * 
  * @example
  * ```tsx
- * import { EmailBuilder } from 'emailbuilder-pro';
+ * import { EmailBuilder } from 'easy-email-builder';
  * 
  * function MyApp() {
  *   const emailBuilderRef = useRef<EmailBuilderRef>(null);

@@ -13,7 +13,7 @@ This builds the library into `dist/` and generates the `.d.ts` type definitions.
 ```bash
 npm pack
 # In another project:
-npm install /path/to/emailbuilder-pro-1.0.0.tgz
+npm install /path/to/easy-email-builder-1.0.0.tgz
 ```
 
 ## 3. Log in and publish

@@ -13,7 +13,7 @@ A standalone HTML editor with code editing and live preview.
 
 ```tsx
 import React, { useState } from 'react';
-import { HtmlEditor } from 'emailbuilder-pro/html-editor';
+import { HtmlEditor } from 'easy-email-builder/html-editor';
 
 function App() {
   const [htmlCode, setHtmlCode] = useState('<p>Hello World</p>');
