@@ -11,6 +11,32 @@ A drag-and-drop email template editor for React.
 - Locked header and footer with ready-made templates
 - 31 starter email templates
 - Image and video upload hooks
+- MCP server: design emails with Claude, Cursor, Codex and other AI agents
+
+## Use with AI agents (MCP)
+
+Add Easy Email Builder to your favorite AI agent as an MCP server, then ask it to design an email. It returns the email HTML and a link that opens the result in the visual editor.
+
+**Claude Code**
+
+```bash
+claude mcp add easy-email-builder -- npx -y easy-email-builder-mcp
+```
+
+**Claude Desktop, Cursor, Windsurf, Gemini CLI and most other MCP clients**: add to the client's MCP config:
+
+```json
+{
+  "mcpServers": {
+    "easy-email-builder": {
+      "command": "npx",
+      "args": ["-y", "easy-email-builder-mcp"]
+    }
+  }
+}
+```
+
+Setup for VS Code, OpenAI Codex and more: see the [MCP server README](./mcp/README.md).
 
 ## Install
 

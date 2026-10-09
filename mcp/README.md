@@ -7,17 +7,19 @@ Let AI assistants (Claude, Cursor, VS Code, …) design HTML email templates wit
 - the template's **variables** (`{{first_name}}`, `{%unsubscribe_link%}`, …) with their fallback values,
 - optionally the editor **JSON**, to load into the `EmailBuilder` React component.
 
-## Setup
+## Add it to your AI agent
 
-Requires Node.js 18+.
+Works with any agent that supports MCP servers running locally. Requires Node.js 18+.
 
-**Claude Code**
+### Claude Code
 
 ```bash
 claude mcp add easy-email-builder -- npx -y easy-email-builder-mcp
 ```
 
-**Claude Desktop, Cursor, VS Code, Windsurf and other clients**: add to the client's MCP config:
+### Claude Desktop
+
+Settings → Developer → Edit Config, add the server, then restart Claude Desktop:
 
 ```json
 {
@@ -30,7 +32,53 @@ claude mcp add easy-email-builder -- npx -y easy-email-builder-mcp
 }
 ```
 
-Then ask, for example: *"Create a welcome email for my coffee shop with a 10% discount code and the customer's first name."*
+If Claude Desktop can't find `npx` (common with nvm), use the full path from `which npx` as the `command`.
+
+### Cursor, Windsurf, Gemini CLI, Cline and others
+
+Use the same `mcpServers` entry as above in the client's MCP config:
+
+| Client | Config file |
+|---|---|
+| Cursor | `~/.cursor/mcp.json` (or `.cursor/mcp.json` in a project) |
+| Windsurf | `~/.codeium/windsurf/mcp_config.json` |
+| Gemini CLI | `~/.gemini/settings.json` |
+| Cline / Roo Code | MCP Servers panel → Configure |
+
+### VS Code (GitHub Copilot)
+
+`.vscode/mcp.json` in your project:
+
+```json
+{
+  "servers": {
+    "easy-email-builder": {
+      "command": "npx",
+      "args": ["-y", "easy-email-builder-mcp"]
+    }
+  }
+}
+```
+
+### OpenAI Codex
+
+```bash
+codex mcp add easy-email-builder -- npx -y easy-email-builder-mcp
+```
+
+or in `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.easy-email-builder]
+command = "npx"
+args = ["-y", "easy-email-builder-mcp"]
+```
+
+> **ChatGPT and claude.ai (web):** these only connect to MCP servers hosted at a URL. This server runs on your machine, so use it from Claude Desktop, Claude Code, Codex or one of the clients above.
+
+### Try it
+
+Ask, for example: *"Create a welcome email for my coffee shop with a 10% discount code and the customer's first name."*
 
 ## Tools
 
