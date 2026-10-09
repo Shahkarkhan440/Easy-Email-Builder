@@ -32,7 +32,19 @@ Settings → Developer → Edit Config, add the server, then restart Claude Desk
 }
 ```
 
-If Claude Desktop can't find `npx` (common with nvm), use the full path from `which npx` as the `command`.
+If the server fails to start with `spawn npx ENOENT` or `env: node: No such file or directory` (common with nvm, because Claude Desktop doesn't load your shell's PATH), use the full path from `which npx` as the `command` and add your Node folder to `PATH`:
+
+```json
+{
+  "mcpServers": {
+    "easy-email-builder": {
+      "command": "/Users/you/.nvm/versions/node/v22.0.0/bin/npx",
+      "args": ["-y", "easy-email-builder-mcp"],
+      "env": { "PATH": "/Users/you/.nvm/versions/node/v22.0.0/bin:/usr/local/bin:/usr/bin:/bin" }
+    }
+  }
+}
+```
 
 ### Cursor, Windsurf, Gemini CLI, Cline and others
 
