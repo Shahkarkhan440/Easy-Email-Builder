@@ -19,6 +19,10 @@ import {
 } from './document';
 import { BLOCK_REFERENCE } from './reference';
 import { LONG_LINK_WARNING_LENGTH, buildPreviewLink, collectVariables, renderHtml } from './render';
+
+const VARIABLES_NOTE =
+  'The HTML keeps every token as is. {{name}} tokens are contact data, with "default" as the fallback. ' +
+  '{%name%} tokens are system values (e.g. unsubscribe_link) that your sending platform replaces at send time.';
 import { getStarterTemplate, listSlotTemplates, listStarterTemplates } from './templates';
 import { ensureHeaderFooter } from '../../src/documents/editor/headerFooter';
 
@@ -145,9 +149,14 @@ server.registerTool(
       return { isError: true, content: [text(`Rendering failed: ${(err as Error)?.message ?? err}`)] };
     }
 
-    const templateVariables = collectVariables(document);
+    const templateVariables = collectVariables(document, html);
     for (const v of templateVariables) {
-      if (v.type === 'user' && !v.default) warnings.push(`${v.variable} has no fallback value; pass it in "variables"`);
+      if (v.type !== 'user' || v.default) continue;
+      warnings.push(
+        v.inRawHtml
+          ? `${v.variable} is typed into raw HTML, so it has no fallback; your sending platform must replace it`
+          : `${v.variable} has no fallback value; pass it in "variables"`,
+      );
     }
 
     const previewUrl = buildPreviewLink(document);
@@ -175,6 +184,7 @@ server.registerTool(
         previewUrl,
         previewNote: 'Opens the email in the Easy Email Builder editor, where it can be edited and exported as HTML or JSON.',
         variables: templateVariables,
+        ...(templateVariables.length ? { variablesNote: VARIABLES_NOTE } : {}),
         warnings,
         ...(Object.keys(written).length ? { savedFiles: written } : {}),
         htmlSize: html.length,

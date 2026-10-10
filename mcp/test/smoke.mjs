@@ -136,6 +136,21 @@ await test('build_email reports readable errors', async () => {
   assert.match(flat.texts[0], /references missing block "missing"/);
 });
 
+await test('build_email reports tokens typed into raw HTML, like the unsubscribe link', async () => {
+  const tree = JSON.parse((await call('get_template', { name: 'welcome' })).texts[0]);
+  const summary = JSON.parse((await call('build_email', { template: tree, include: [] })).texts[0]);
+  const unsubscribe = summary.variables.find((v) => v.variable === '{%unsubscribe_link%}');
+  assert.deepEqual(unsubscribe, { variable: '{%unsubscribe_link%}', type: 'system', attribute: 'unsubscribe_link', default: '', inRawHtml: true });
+  assert.match(summary.variablesNote, /sending platform/);
+
+  const res = await call('build_email', {
+    template: { blocks: [{ type: 'Text', props: { html: '<p><a href="https://x.com/?u={{ user_id }}">Hi {{first_name}}</a></p>' } }] },
+  });
+  const raw = JSON.parse(res.texts[0]);
+  assert.deepEqual(raw.variables.map((v) => v.variable).sort(), ['{{first_name}}', '{{user_id}}']);
+  assert.match(raw.warnings.join('\n'), /\{\{user_id\}\} is typed into raw HTML/);
+});
+
 await test('build_email warns about variables without a fallback', async () => {
   const res = await call('build_email', { template: { blocks: [{ type: 'Text', props: { message: 'Hi {{nickname}}' } }] } });
   assert.ok(!res.isError);

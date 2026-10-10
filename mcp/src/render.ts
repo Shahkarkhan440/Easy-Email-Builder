@@ -15,13 +15,33 @@ export function renderHtml(document: EmailDocument): string {
   return renderToStaticMarkup(document as any, { rootBlockId: 'root' });
 }
 
-export function collectVariables(document: EmailDocument) {
-  return collectTemplateVariablesFromDocument(document as any).map(({ variable, type, attribute, default: def }) => ({
-    variable,
-    type,
-    attribute,
-    default: def,
-  }));
+export type TemplateVariable = {
+  variable: string;
+  type: 'user' | 'system';
+  attribute: string;
+  default: string;
+  /** True when the token was typed into raw HTML (e.g. a link href), so no fallback can be attached */
+  inRawHtml?: true;
+};
+
+const HTML_TOKEN_RE = /\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}\}|\{%\s*([A-Za-z_][A-Za-z0-9_]*)\s*%\}/g;
+
+/**
+ * Variables from the editor's collector (inserted variables, heading tokens), plus any other
+ * `{{name}}` / `{%name%}` token left in the rendered HTML, such as `{%unsubscribe_link%}` in a footer link.
+ */
+export function collectVariables(document: EmailDocument, html: string): TemplateVariable[] {
+  const rows: TemplateVariable[] = collectTemplateVariablesFromDocument(document as any).map(
+    ({ variable, type, attribute, default: def }) => ({ variable, type, attribute, default: def }),
+  );
+  const known = new Set(rows.map((r) => r.variable));
+  for (const [, userName, systemName] of html.matchAll(HTML_TOKEN_RE)) {
+    const variable = userName ? `{{${userName}}}` : `{%${systemName}%}`;
+    if (known.has(variable)) continue;
+    known.add(variable);
+    rows.push({ variable, type: userName ? 'user' : 'system', attribute: userName ?? systemName, default: '', inRawHtml: true });
+  }
+  return rows;
 }
 
 /** EASY_EMAIL_BUILDER_EDITOR_URL when it is an http(s) URL; extension hosts may pass an empty or unfilled value */
