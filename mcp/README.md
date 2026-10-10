@@ -114,7 +114,7 @@ Ask, for example: *"Create a welcome email for my coffee shop with a 10% discoun
 | `get_block_reference` | The template format: blocks, properties, colors, variables |
 | `list_templates` | 31 starter templates, plus the built-in header and footer ids |
 | `get_template` | A starter template to adapt (nested "tree" format or flat editor JSON) |
-| `build_email` | Validates a template, renders the HTML, lists its variables and returns a preview link. Can also save the HTML/JSON to files |
+| `build_email` | Validates a template, renders the HTML, lists its variables and returns a preview link. Warns about things that break in Outlook or Gmail (nested columns, oversized images, unsupported CSS, Gmail clipping). Can also save the HTML/JSON to files |
 
 ## Preview links
 

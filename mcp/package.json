@@ -1,6 +1,6 @@
 {
   "name": "easy-email-builder-mcp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "MCP server for Easy Email Builder: generate email templates with AI, render them to HTML, and get a link to open them in the visual editor",
   "keywords": [
     "mcp",

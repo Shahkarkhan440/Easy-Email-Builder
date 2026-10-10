@@ -50,7 +50,44 @@ await test('every starter template round-trips through tree format and builds', 
     const res = await call('build_email', { template: tree });
     assert.ok(!res.isError, `${name}: ${res.texts[0]}`);
     assert.match(res.texts[1], /^<!DOCTYPE html>/);
+    assert.deepEqual(JSON.parse(res.texts[0]).warnings, [], `${name} has warnings`);
   }
+});
+
+await test('build_email warns about layouts that break in Outlook and Gmail', async () => {
+  const res = await call('build_email', {
+    template: {
+      blocks: [
+        { type: 'Image', props: { url: 'https://placehold.co/600x300/png' } },
+        {
+          type: 'ColumnsContainer',
+          columns: [
+            [{ type: 'ColumnsContainer', columns: [[{ type: 'Spacer' }], [{ type: 'Spacer' }]] }],
+            [{ type: 'Image', props: { url: 'https://placehold.co/600x300/png', alt: 'wide', width: 600 } }],
+          ],
+        },
+        { type: 'Image', props: { url: 'https://placehold.co/600x300/png', alt: 'fits', width: 552 } },
+        { type: 'Html', props: { contents: '<div style="display:flex;background-image:url(https://x.com/a.png)"><img src="https://x.com/b.png"><script>1</script></div>' } },
+        { type: 'Text', props: { html: `<p>${'x'.repeat(110 * 1024)}</p>` } },
+      ],
+    },
+    include: [],
+  });
+  assert.ok(!res.isError, res.texts[0]);
+  const warnings = JSON.parse(res.texts[0]).warnings.join('\n');
+  const expected = [
+    /blocks\[0\]: Image has no width/,
+    /blocks\[0\]: Image has no alt text/,
+    /blocks\[1\]\.columns\[0\]\[0\]: columns inside columns/,
+    /blocks\[1\]\.columns\[1\]\[0\]: Image is 600px wide but only about 300px/,
+    /<script> is removed/,
+    /flexbox/,
+    /background images/,
+    /1 <img> without a width/,
+    /Gmail clips emails over 102 KB/,
+  ];
+  for (const re of expected) assert.match(warnings, re);
+  assert.doesNotMatch(warnings, /blocks\[2\]/);
 });
 
 await test('get_template rejects unknown names', async () => {

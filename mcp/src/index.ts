@@ -18,6 +18,7 @@ import {
   validateDocument,
 } from './document';
 import { BLOCK_REFERENCE } from './reference';
+import { compatibilityWarnings } from './compatibility';
 import { LONG_LINK_WARNING_LENGTH, buildPreviewLink, collectVariables, renderHtml } from './render';
 
 const VARIABLES_NOTE =
@@ -103,7 +104,8 @@ server.registerTool(
     description:
       'Validates a template, renders the final email HTML, lists its variables, and returns a preview link that opens the ' +
       'email in the Easy Email Builder visual editor (where it can be edited and exported). Accepts the tree format ' +
-      '({ layout, header, footer, blocks }) or a flat editor document. On validation errors nothing is rendered; fix them and call again.',
+      '({ layout, header, footer, blocks }) or a flat editor document. On validation errors nothing is rendered; fix them and call again. ' +
+      '"warnings" also flags things that break in Outlook or Gmail (nested columns, oversized images, unsupported CSS in raw HTML, clipping); fix those too unless the user accepts them.',
     inputSchema: {
       template: z
         .record(z.string(), z.any())
@@ -148,6 +150,8 @@ server.registerTool(
     } catch (err) {
       return { isError: true, content: [text(`Rendering failed: ${(err as Error)?.message ?? err}`)] };
     }
+
+    warnings.push(...compatibilityWarnings(document, html, (id) => locations?.get(id) ?? `block "${id}"`));
 
     const templateVariables = collectVariables(document, html);
     for (const v of templateVariables) {

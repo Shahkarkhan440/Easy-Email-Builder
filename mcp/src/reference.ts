@@ -56,7 +56,7 @@ Write templates in the **tree format** and pass them to \`build_email\`:
 
 **Container** — groups blocks with a shared background. style: backgroundColor, borderColor, borderRadius, padding. \`children\`: blocks.
 
-**ColumnsContainer** — side-by-side columns (stacked on mobile). style: backgroundColor, padding. props: columnsGap (px), contentAlignment (top | middle | bottom | stretch), fixedWidths ([n|null, n|null, n|null, n|null], px per column, null = auto). \`columns\`: 1-4 arrays of blocks.
+**ColumnsContainer** — side-by-side columns (stacked on mobile). style: backgroundColor, padding. props: columnsGap (px), contentAlignment (top | middle | bottom | stretch), fixedWidths ([n|null, n|null, n|null, n|null], null = equal share; when all set values are ≤ 100 they are percentages, e.g. [30, 70], otherwise px). \`columns\`: 1-4 arrays of blocks.
 
 ## Variables (personalization)
 - Write \`{{name}}\` for contact data and \`{%name%}\` for values filled at send time, directly in Heading \`text\`, Text \`message\`/\`html\`, Button \`text\`, or link \`href\`s.
@@ -67,5 +67,6 @@ Write templates in the **tree format** and pass them to \`build_email\`:
 ## Tips
 - Start from a starter template (\`list_templates\` → \`get_template\`) when one is close, then edit it.
 - Use 24px left/right padding on content blocks so text doesn't touch the edges.
+- Outlook (Windows) renders with Word: don't nest ColumnsContainers, give every Image a \`width\` that fits its column and \`alt\` text, and avoid flex, grid, position, float and background images in raw HTML. \`build_email\` warns about these.
 - Use real https image URLs. For placeholders: \`https://placehold.co/600x300/E5E7EB/111827/png?text=Hero\`.
 `;

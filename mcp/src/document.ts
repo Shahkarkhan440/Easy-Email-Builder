@@ -343,7 +343,7 @@ export function linkVariables(document: EmailDocument, defaults: Record<string, 
 
 // ==================== Validation ====================
 
-function childIdsOf(block: { type: string; data: any }): string[] {
+export function childIdsOf(block: { type: string; data: any }): string[] {
   if (block.type === 'EmailLayout') return block.data?.childrenIds ?? [];
   if (block.type === 'Container') return block.data?.props?.childrenIds ?? [];
   if (block.type === 'ColumnsContainer') {
