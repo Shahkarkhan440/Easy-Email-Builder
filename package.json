@@ -1,6 +1,6 @@
 {
   "name": "easy-email-builder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Easy Email Builder - a drag-and-drop email template editor for React",
   "keywords": [
     "email",
