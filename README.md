@@ -102,6 +102,7 @@ export default function App() {
 | `videoUploadHandler(file)` | Upload a video, return its URL |
 | `initialName` / `onNameChange` | Template name |
 | `showJsonFeatures` | Show the JSON tab, import and export (default `true`) |
+| `editingSlot` | `'header'` or `'footer'`: open the editor locked to that region only; its HTML output contains just that region |
 | `theme` | Custom MUI theme |
 
 Use a ref to read the current template:

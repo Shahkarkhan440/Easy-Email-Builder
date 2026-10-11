@@ -1,12 +1,12 @@
 import React, { useEffect, useImperativeHandle, forwardRef, useRef, memo } from 'react';
 
 import { Box, CssBaseline, ThemeProvider } from '@mui/material';
-import { renderToStaticMarkup } from 'monto-email-core';
-
 import {
   initializeStore,
   resetDocument,
+  renderDocumentHtml,
   setEditingSlot,
+  setLockedSlot,
   setImageUploadHandler,
   setShowJsonFeatures,
   setShowSamplesDrawerTitle,
@@ -145,6 +145,13 @@ export interface EmailBuilderProps {
    * When only `variables` changes, it is merged into the current document instead of replacing it.
    */
   variables?: EmailBuilderVariableInput[];
+
+  /**
+   * Open the editor locked to the header or footer only (e.g. when building a reusable header/footer).
+   * The canvas shows just that region, the user cannot leave it, and the HTML from
+   * `getData`/`onChange` contains only that region.
+   */
+  editingSlot?: 'header' | 'footer';
 }
 
 /**
@@ -216,6 +223,7 @@ const EmailBuilder = forwardRef<EmailBuilderRef, EmailBuilderProps>(({
   onInspectorDrawerToggle,
   contactAttributes,
   variables,
+  editingSlot,
 }, ref) => {
   // Initialize the store (including the history manager)
   // Initialize synchronously so props apply on the first render (avoids drawer/title flicker)
@@ -229,8 +237,13 @@ const EmailBuilder = forwardRef<EmailBuilderRef, EmailBuilderProps>(({
       showSamplesDrawerTitle: showSamplesDrawerTitle,
       contactAttributes: contactAttributes,
     });
+    setLockedSlot(editingSlot ?? null);
     initializedRef.current = true;
   }
+
+  useEffect(() => {
+    setLockedSlot(editingSlot ?? null);
+  }, [editingSlot]);
 
   // When initialDocument changes, replace the document and merge variables
   useEffect(() => {
@@ -277,13 +290,8 @@ const EmailBuilder = forwardRef<EmailBuilderRef, EmailBuilderProps>(({
     getData: (callback: (json: TEditorConfiguration, html: string) => void) => {
       flushActiveTextEditorToDocument();
       const document = editorStateStore.getState().document;
-      try {
-        const html = renderToStaticMarkup(document, { rootBlockId: 'root' });
-        callback(document, html);
-      } catch (error) {
-        // Still return JSON if HTML rendering fails
-        callback(document, '<!-- Error rendering HTML -->');
-      }
+      // Still returns JSON if HTML rendering fails
+      callback(document, renderDocumentHtml(document));
     },
     getVariables: (callback: (items: EmailTemplateVariableItem[]) => void) => {
       flushActiveTextEditorToDocument();

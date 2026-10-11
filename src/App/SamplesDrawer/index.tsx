@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Button, Divider, Drawer, Stack, Typography } from '@mui/material';
 
-import { resetDocument, useSamplesDrawerOpen, setDocument, setSelectedBlockId, useDocument, useShowSamplesDrawerTitle, editorStateStore, setEditingSlot } from '../../documents/editor/EditorContext';
+import { resetDocument, useSamplesDrawerOpen, setDocument, setSelectedBlockId, useDocument, useShowSamplesDrawerTitle, editorStateStore, setEditingSlot, useLockedSlot } from '../../documents/editor/EditorContext';
 import { FOOTER_BLOCK_ID, HEADER_BLOCK_ID } from '../../documents/editor/headerFooter';
 import { useLeftPanelSlot } from '../../LeftPanelSlotContext';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -25,6 +25,8 @@ export default function SamplesDrawer() {
   const document = useDocument();
   const showSamplesDrawerTitle = useShowSamplesDrawerTitle();
   const leftPanelSlot = useLeftPanelSlot();
+  // Locked to a header/footer: hide "New document" and the full-email starter templates
+  const lockedSlot = useLockedSlot();
 
   const handleNewDocumentClick = () => {
     setEditingSlot(null);
@@ -123,7 +125,7 @@ export default function SamplesDrawer() {
     >
       <Stack spacing={3} py={1} px={2} width={SAMPLES_DRAWER_WIDTH} sx={{ overflowY: 'auto', overflowX: 'hidden', height: '100%' }}>
         <Stack spacing={2} sx={{ '& .MuiButtonBase-root': { width: '100%', justifyContent: 'flex-start' } }}>
-          {showSamplesDrawerTitle && (
+          {showSamplesDrawerTitle && !lockedSlot && (
             <>
               <Typography variant="h6" component="h1" sx={{ p: 0.75 }}>
                 {t('common.emailBuilder')}

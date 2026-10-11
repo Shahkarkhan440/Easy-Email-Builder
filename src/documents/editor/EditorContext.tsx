@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from 'monto-email-core';
 
 import { TEditorConfiguration } from './core';
 import { HistoryManager } from './HistoryManager';
-import { ensureHeaderFooter } from './headerFooter';
+import { FOOTER_BLOCK_ID, HEADER_BLOCK_ID, ensureHeaderFooter } from './headerFooter';
 
 import { getLanguage, Language, setLanguage as setI18nLanguage } from '../../i18n';
 
@@ -60,6 +60,9 @@ type TValue = {
 
   /** When editing the header/footer on its own, the canvas shows only that region */
   editingSlot: 'header' | 'footer' | null;
+
+  /** Set via the EmailBuilder `editingSlot` prop: the editor is locked to this region and cannot leave it */
+  lockedSlot: 'header' | 'footer' | null;
 
   // Image upload handler
   imageUploadHandler?: (file: File) => Promise<string>;
@@ -153,7 +156,7 @@ export function initializeStore(config?: {
     selectedScreenSize: 'desktop',
     inspectorDrawerOpen: true,
     samplesDrawerOpen: true,
-    editingSlot: null,
+    editingSlot: editorStateStore.getState().lockedSlot,
   });
 
   // Keep i18n in sync with the language prop
@@ -183,6 +186,7 @@ const editorStateStore = create<TValue>((set, get) => ({
   inspectorDrawerOpen: true,
   samplesDrawerOpen: true,
   editingSlot: null,
+  lockedSlot: null,
 
   language: initialLanguage || getLanguage(),
   contactAttributes: [],
@@ -316,14 +320,28 @@ export function setSidebarTab(selectedSidebarTab: TValue['selectedSidebarTab']) 
   return editorStateStore.setState({ selectedSidebarTab });
 }
 
-function computeHtmlAndNotify(document: TEditorConfiguration, onChange: (doc: TEditorConfiguration, html: string) => void) {
-  let html: string;
+/**
+ * The document as it should be rendered for output (preview, HTML, onChange/getData html).
+ * When the editor is locked to a header/footer, only that region is rendered.
+ */
+export function getOutputDocument(document: TEditorConfiguration): TEditorConfiguration {
+  const lockedSlot = editorStateStore.getState().lockedSlot;
+  const root = document.root;
+  if (!lockedSlot || root?.type !== 'EmailLayout') return document;
+  const slotId = lockedSlot === 'header' ? HEADER_BLOCK_ID : FOOTER_BLOCK_ID;
+  return { ...document, root: { ...root, data: { ...root.data, childrenIds: [slotId] } } };
+}
+
+export function renderDocumentHtml(document: TEditorConfiguration): string {
   try {
-    html = renderToStaticMarkup(document, { rootBlockId: 'root' });
+    return renderToStaticMarkup(getOutputDocument(document), { rootBlockId: 'root' });
   } catch {
-    html = '<!-- Error rendering HTML -->';
+    return '<!-- Error rendering HTML -->';
   }
-  onChange(document, html);
+}
+
+function computeHtmlAndNotify(document: TEditorConfiguration, onChange: (doc: TEditorConfiguration, html: string) => void) {
+  onChange(document, renderDocumentHtml(document));
 }
 
 export function resetDocument(rawDocument: TValue['document']) {
@@ -404,7 +422,17 @@ export function useEditingSlot() {
 }
 
 export function setEditingSlot(editingSlot: TValue['editingSlot']) {
-  return editorStateStore.setState({ editingSlot });
+  // A locked editor always stays on its region
+  const lockedSlot = editorStateStore.getState().lockedSlot;
+  return editorStateStore.setState({ editingSlot: lockedSlot ?? editingSlot });
+}
+
+export function useLockedSlot() {
+  return editorStateStore((s) => s.lockedSlot);
+}
+
+export function setLockedSlot(lockedSlot: TValue['lockedSlot']) {
+  return editorStateStore.setState({ lockedSlot, editingSlot: lockedSlot });
 }
 
 export function setOnChange(onChange: TValue['onChange']) {

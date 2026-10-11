@@ -7,9 +7,11 @@ import { Reader } from 'monto-email-core';
 
 import EditorBlock from '../../documents/editor/EditorBlock';
 import {
+  getOutputDocument,
   setSelectedMainTab,
   setSelectedScreenSize,
   useDocument,
+  useLockedSlot,
   useSelectedMainTab,
   useSelectedScreenSize,
   useShowJsonFeatures,
@@ -37,6 +39,7 @@ const PhoneIphoneOutlined = resolveMuiIcon(PhoneIphoneOutlinedModule);
 export default function TemplatePanel() {
   const { t } = useTranslation();
   const document = useDocument();
+  const lockedSlot = useLockedSlot();
   const selectedMainTab = useSelectedMainTab();
   const selectedScreenSize = useSelectedScreenSize();
   const showJsonFeatures = useShowJsonFeatures();
@@ -87,7 +90,7 @@ export default function TemplatePanel() {
       case 'preview':
         return (
           <Box sx={mainBoxSx}>
-            <Reader document={document} rootBlockId="root" />
+            <Reader key={lockedSlot ?? 'all'} document={getOutputDocument(document)} rootBlockId="root" />
           </Box>
         );
       case 'html':

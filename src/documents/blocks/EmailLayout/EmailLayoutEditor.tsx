@@ -1,7 +1,7 @@
 import React from 'react';
 
 import EditorBlock, { useCurrentBlockId } from '../../editor/EditorBlock';
-import { setDocument, setSelectedBlockId, useDocument, editorStateStore, useEditingSlot, setEditingSlot } from '../../editor/EditorContext';
+import { setDocument, setSelectedBlockId, useDocument, editorStateStore, useEditingSlot, setEditingSlot, useLockedSlot } from '../../editor/EditorContext';
 import { useTranslation } from '../../../i18n/useTranslation';
 import EditorChildrenIds from '../helpers/EditorChildrenIds';
 import HeaderFooterPlaceholder, { ReadOnlyHeaderFooter } from './HeaderFooterPlaceholder';
@@ -56,6 +56,7 @@ export default function EmailLayoutEditor(props: EmailLayoutProps) {
   const withLockedSlots = (ids: string[]) => [HEADER_BLOCK_ID, ...ids.filter((id) => !isLockedBlockId(id)), FOOTER_BLOCK_ID];
   const document = useDocument();
   const editingSlot = useEditingSlot();
+  const lockedSlot = useLockedSlot();
   const { t } = useTranslation();
 
   // An empty header/footer shows a "Choose header/footer" placeholder;
@@ -294,24 +295,26 @@ export default function EmailLayoutEditor(props: EmailLayoutProps) {
           }}
         >
           <span>{editingSlot === 'header' ? t('headerFooter.editingHeader') : t('headerFooter.editingFooter')}</span>
-          <button
-            type="button"
-            onClick={() => {
-              setEditingSlot(null);
-              setSelectedBlockId(null);
-            }}
-            style={{
-              border: 'none',
-              borderRadius: '4px',
-              padding: '4px 12px',
-              cursor: 'pointer',
-              color: '#fff',
-              backgroundColor: '#0079CC',
-              fontSize: '13px',
-            }}
-          >
-            {t('headerFooter.done')}
-          </button>
+          {!lockedSlot && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingSlot(null);
+                setSelectedBlockId(null);
+              }}
+              style={{
+                border: 'none',
+                borderRadius: '4px',
+                padding: '4px 12px',
+                cursor: 'pointer',
+                color: '#fff',
+                backgroundColor: '#0079CC',
+                fontSize: '13px',
+              }}
+            >
+              {t('headerFooter.done')}
+            </button>
+          )}
         </div>
       )}
       <table

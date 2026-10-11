@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { Button, Link, Stack, Typography } from '@mui/material';
 
-import { editorStateStore, replaceDocument, setEditingSlot, setSelectedBlockId, useDocument, useEditingSlot } from '../../documents/editor/EditorContext';
+import { editorStateStore, replaceDocument, setEditingSlot, setSelectedBlockId, useDocument, useEditingSlot, useLockedSlot } from '../../documents/editor/EditorContext';
 import {
   FEATURED_COUNT,
   FOOTER_BLOCK_ID,
@@ -20,6 +20,8 @@ export default function HeaderFooterTemplates() {
   const { t, language } = useTranslation();
   const document = useDocument();
   const editingSlot = useEditingSlot();
+  // A locked editor only offers presets for its own region
+  const lockedSlot = useLockedSlot();
   const [gallerySlot, setGallerySlot] = useState<THeaderFooterSlot | null>(null);
 
   const slotHasContent = (slot: THeaderFooterSlot) => {
@@ -70,10 +72,11 @@ export default function HeaderFooterTemplates() {
       <Typography variant="caption" color="text.secondary" sx={{ px: 0.75, fontWeight: 500 }}>
         {t('headerFooter.title')}
       </Typography>
-      {renderGroup('header', t('headerFooter.headers'), HEADER_TEMPLATES)}
-      {renderGroup('footer', t('headerFooter.footers'), FOOTER_TEMPLATES)}
+      {lockedSlot !== 'footer' && renderGroup('header', t('headerFooter.headers'), HEADER_TEMPLATES)}
+      {lockedSlot !== 'header' && renderGroup('footer', t('headerFooter.footers'), FOOTER_TEMPLATES)}
       <HeaderFooterGalleryDialog
         open={gallerySlot !== null}
+        slots={lockedSlot ? [lockedSlot] : undefined}
         initialSlot={gallerySlot ?? undefined}
         onClose={() => setGallerySlot(null)}
         onSelect={handleSelect}
