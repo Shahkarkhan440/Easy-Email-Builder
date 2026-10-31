@@ -20,6 +20,7 @@ import {
   setContactAttributes,
   editorStateStore,
 } from '../documents/editor/EditorContext';
+import { AiPanelSlotProvider } from '../AiPanelSlotContext';
 import { LeftPanelSlotProvider } from '../LeftPanelSlotContext';
 import { Language } from '../i18n';
 import {
@@ -122,6 +123,13 @@ export interface EmailBuilderProps {
   leftPanelSlot?: React.ReactNode;
 
   /**
+   * Content of a "Create Template by AI" tab in the right panel, next to Styles and Inspect.
+   * The tab appears only when this is passed; without it the panel is unchanged. The editor does
+   * not know what the content does (e.g. an AI chat that loads documents through `initialDocument`).
+   */
+  aiPanelSlot?: React.ReactNode;
+
+  /**
    * Called when the left sidebar is toggled
    * Fires when the user collapses/expands the left sidebar
    * @param isOpen Whether the sidebar is open
@@ -219,6 +227,7 @@ const EmailBuilder = forwardRef<EmailBuilderRef, EmailBuilderProps>(({
   showJsonFeatures = true,
   showSamplesDrawerTitle = true,
   leftPanelSlot,
+  aiPanelSlot,
   onSamplesDrawerToggle,
   onInspectorDrawerToggle,
   contactAttributes,
@@ -340,7 +349,9 @@ const EmailBuilder = forwardRef<EmailBuilderRef, EmailBuilderProps>(({
     <ThemeProvider theme={customTheme || theme}>
       <CssBaseline />
       <LeftPanelSlotProvider value={leftPanelSlot ?? null}>
-        <AppLayout />
+        <AiPanelSlotProvider value={aiPanelSlot ?? null}>
+          <AppLayout />
+        </AiPanelSlotProvider>
       </LeftPanelSlotProvider>
     </ThemeProvider>
   );

@@ -51,7 +51,7 @@ type TValue = {
   lastTextBlockContent: { blockId: string; text: string; styleSnapshot?: Partial<TStyle> } | null;
   /** DOM-level style/link changes requested by the inspector (consumed by TextEditor) */
   textDomApplyRequest: TextDomApplyRequest | null;
-  selectedSidebarTab: 'block-configuration' | 'styles';
+  selectedSidebarTab: 'block-configuration' | 'styles' | 'ai';
   selectedMainTab: 'editor' | 'preview' | 'json' | 'html';
   selectedScreenSize: 'desktop' | 'mobile';
 
@@ -243,7 +243,13 @@ export function useSamplesDrawerOpen() {
 }
 
 export function setSelectedBlockId(selectedBlockId: TValue['selectedBlockId']) {
-  const selectedSidebarTab = selectedBlockId === null ? 'styles' : 'block-configuration';
+  // Deselecting a block must not pull the user out of the AI tab (only selecting a block switches to Inspect).
+  const selectedSidebarTab =
+    selectedBlockId !== null
+      ? 'block-configuration'
+      : editorStateStore.getState().selectedSidebarTab === 'ai'
+        ? 'ai'
+        : 'styles';
   const options: Partial<TValue> = {};
   if (selectedBlockId !== null) {
     options.inspectorDrawerOpen = true;
@@ -353,7 +359,8 @@ export function resetDocument(rawDocument: TValue['document']) {
 
   editorStateStore.setState({
     document,
-    selectedSidebarTab: 'styles',
+    // A document loaded while the AI tab is open (the AI's own result) keeps the AI tab open.
+    selectedSidebarTab: editorStateStore.getState().selectedSidebarTab === 'ai' ? 'ai' : 'styles',
     selectedBlockId: null,
     textSelection: null,
     lastTextBlockContent: null,
