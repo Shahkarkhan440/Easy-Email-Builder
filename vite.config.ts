@@ -19,6 +19,10 @@ export default defineConfig(({ mode }) => {
           entry: {
             index: resolve(__dirname, 'src/index.ts'),
             'html-editor': resolve(__dirname, 'src/html-editor.ts'),
+            // Separate entry so this never shares a chunk with EmailBuilder (which pulls in MUI):
+            // scripts/export-schema.mjs imports this file directly, with plain Node ESM resolution
+            // that can't follow @mui/icons-material's bundler-only deep imports.
+            schema: resolve(__dirname, 'src/documents/editor/schema.ts'),
           },
           name: 'EmailBuilder',
           formats: ['es'],
@@ -101,9 +105,12 @@ export default defineConfig(({ mode }) => {
             },
             // Entry file naming
             entryFileNames: (chunkInfo) => {
-              // Main entry stays index.js; the html-editor entry uses html-editor.js
+              // Main entry stays index.js; the html-editor and schema entries get their own files
               if (chunkInfo.name === 'html-editor') {
                 return 'html-editor.js';
+              }
+              if (chunkInfo.name === 'schema') {
+                return 'schema.js';
               }
               return 'index.js';
             },
