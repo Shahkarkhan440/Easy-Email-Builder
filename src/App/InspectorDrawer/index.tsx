@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Box, Drawer, Tab, Tabs } from '@mui/material';
+import * as AutoAwesomeOutlinedModule from '@mui/icons-material/AutoAwesomeOutlined';
 
 import {
   setSidebarTab,
@@ -10,33 +11,17 @@ import {
 } from '../../documents/editor/EditorContext';
 import { useAiPanelSlot } from '../../AiPanelSlotContext';
 import { useTranslation } from '../../i18n/useTranslation';
+import { resolveMuiIcon } from '../../utils/resolveMuiIcon';
 
 import ConfigurationPanel from './ConfigurationPanel';
 import StylesPanel from './StylesPanel';
+
+const AutoAwesomeOutlined = resolveMuiIcon(AutoAwesomeOutlinedModule);
 
 export const INSPECTOR_DRAWER_WIDTH = 320;
 
 // Only used when the AI tab exists; without it the tabs keep their default look.
 const COMPACT_TAB_SX = { minWidth: 0, px: 1.5 } as const;
-// The AI tab is a solid black button, so it stands out next to the plain Styles / Inspect tabs.
-const AI_TAB_SX = {
-  ...COMPACT_TAB_SX,
-  flex: '1 1 0',
-  maxWidth: 'none',
-  whiteSpace: 'normal',
-  lineHeight: 1.2,
-  textAlign: 'center',
-  textWrap: 'balance',
-  minHeight: 36,
-  my: '6px',
-  ml: 1,
-  borderRadius: 2,
-  bgcolor: '#000',
-  color: '#fff',
-  fontWeight: 600,
-  '&:hover': { bgcolor: '#262626', color: '#fff' },
-  '&.Mui-selected': { color: '#fff' },
-} as const;
 
 export default function InspectorDrawer() {
   const { t } = useTranslation();
@@ -48,6 +33,10 @@ export default function InspectorDrawer() {
   const selectedMainTab = useSelectedMainTab();
   const isPreviewMode = selectedMainTab === 'preview';
 
+  // The AI panel keeps its own conversation state (messages, in-flight job) in the host app,
+  // so it must stay mounted across tab switches instead of being torn down and recreated --
+  // otherwise switching to Styles/Inspect and back would restart the chat. It's kept mounted
+  // below and just hidden with CSS while another sidebar tab is active.
   const renderCurrentSidebarPanel = () => {
     switch (selectedSidebarTab) {
       case 'block-configuration':
@@ -55,7 +44,7 @@ export default function InspectorDrawer() {
       case 'styles':
         return <StylesPanel />;
       case 'ai':
-        return aiPanelSlot;
+        return null;
     }
   };
 
@@ -88,16 +77,18 @@ export default function InspectorDrawer() {
       }}
     >
       <Box px={2}>
-        <Tabs
-          value={selectedSidebarTab}
-          onChange={(_, v) => setSidebarTab(v)}
-          // The black AI button marks itself as selected: no underline under it.
-          TabIndicatorProps={selectedSidebarTab === 'ai' ? { style: { display: 'none' } } : undefined}
-        >
+        <Tabs value={selectedSidebarTab} onChange={(_, v) => setSidebarTab(v)}>
           <Tab value="styles" label={t('inspector.styles')} sx={aiPanelSlot ? COMPACT_TAB_SX : undefined} />
           <Tab value="block-configuration" label={t('inspector.inspect')} sx={aiPanelSlot ? COMPACT_TAB_SX : undefined} />
-          {/* Three tabs must fit the 320px panel: the AI tab takes the rest of the row and wraps its label. */}
-          {aiPanelSlot ? <Tab value="ai" label={t('inspector.ai')} sx={AI_TAB_SX} /> : null}
+          {aiPanelSlot ? (
+            <Tab
+              value="ai"
+              icon={<AutoAwesomeOutlined fontSize="small" />}
+              iconPosition="start"
+              label={t('inspector.ai')}
+              sx={COMPACT_TAB_SX}
+            />
+          ) : null}
         </Tabs>
       </Box>
       <Box
@@ -111,6 +102,11 @@ export default function InspectorDrawer() {
         }}
       >
         {renderCurrentSidebarPanel()}
+        {aiPanelSlot ? (
+          <Box sx={{ display: selectedSidebarTab === 'ai' ? 'flex' : 'none', flexDirection: 'column', height: '100%' }}>
+            {aiPanelSlot}
+          </Box>
+        ) : null}
       </Box>
     </Drawer>
   );

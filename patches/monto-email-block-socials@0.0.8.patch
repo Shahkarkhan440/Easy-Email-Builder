@@ -1,0 +1,13 @@
+diff --git a/dist/index.js b/dist/index.js
+index 91ba3445612e76f342348e6503c523072409a033..890713a07f7ab8f81b2c0e024c38027efed81f15 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -187,7 +187,7 @@ export function Socials({ style, props }) {
+                                     const height = iconSize;
+                                     // 使用 index 作为 key 的一部分，以支持重复的平台
+                                     const iconKey = socials.length > 0 ? `social-${index}` : platform;
+-                                    const iconElement = iconCdnUrl ? (React.createElement("img", Object.assign({ key: iconKey, src: iconCdnUrl, alt: platform, width: width, height: height }, { fetchpriority: 'high' }, { style: {
++                                    const iconElement = iconCdnUrl ? (React.createElement("img", Object.assign({ key: iconKey, src: iconCdnUrl, alt: platform, width: width, height: height }, { fetchPriority: 'high' }, { style: {
+                                             width: `${width}px`,
+                                             height: `${height}px`,
+                                             display: 'block',

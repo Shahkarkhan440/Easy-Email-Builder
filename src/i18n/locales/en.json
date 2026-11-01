@@ -27,7 +27,7 @@
   "inspector": {
     "styles": "Styles",
     "inspect": "Inspect",
-    "ai": "Create Template by AI",
+    "ai": "AI",
     "clickBlockToInspect": "Click on a block to inspect.",
     "blockNotFound": "Block with id {{id}} was not found. Click on a block to reset."
   },
